@@ -10,7 +10,6 @@ const adminSchema = new Schema({
     type: Boolean,
     default: false,
   },
-
   email: {
     type: String,
     lowercase: true,
@@ -18,7 +17,7 @@ const adminSchema = new Schema({
     required: true,
   },
   name: { type: String, required: true },
-  surname: { type: String },
+  last_name: { type: String },
   photo: {
     type: String,
     trim: true,
@@ -29,8 +28,6 @@ const adminSchema = new Schema({
   },
   role: {
     type: String,
-    default: 'owner',
-    enum: ['owner'],
   },
 });
 

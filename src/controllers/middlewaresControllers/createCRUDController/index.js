@@ -1,4 +1,4 @@
-const { modelsFiles } = require('@/models/utils');
+const { routesList } = require('../../../models/utils');
 
 const mongoose = require('mongoose');
 
@@ -13,8 +13,10 @@ const listAll = require('./listAll');
 const paginatedList = require('./paginatedList');
 
 const createCRUDController = (modelName) => {
-  if (!modelsFiles.includes(modelName)) {
-    throw new Error(`Model ${modelName} does not exist`);
+  if (!routesList.includes(modelName)) {
+    // throw new Error(`Model ${modelName} does not exist`);
+    console.warn(`Skipping CRUD controller for non-Sequelize model: ${modelName}`);
+    return {}; // Return an empty object to avoid errors
   }
 
   const Model = mongoose.model(modelName);

@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Model = mongoose.model('Setting');
 
 const listAll = async (req, res) => {
+  return res.status(201);
   const sort = parseInt(req.query.sort) || 'desc';
 
   //  Query the database for a list of all results

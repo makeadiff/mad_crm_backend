@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const Model = mongoose.model('Quote');
 
 const paginatedList = async (req, res) => {
+  return res.status(201);
   const page = req.query.page || 1;
   const limit = parseInt(req.query.items) || 10;
   const skip = page * limit - limit;

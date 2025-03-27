@@ -1,0 +1,44 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "AWSgonemad123",
+    "database": "mad_dalgo_warehouse",
+    "host": "mad-dalgo-db.cj44c6c8697a.ap-south-1.rds.amazonaws.com",
+    "dialect": "postgres",
+    "logging": false,
+    "dialectOptions": {
+      "ssl": {
+        "require": true,
+        "rejectUnauthorized": false
+      }
+    }
+  },
+  "test": {
+    "username": "postgres",
+    "password": "AWSgonemad123",
+    "database": "mad_dalgo_warehouse",
+    "host": "mad-dalgo-db.cj44c6c8697a.ap-south-1.rds.amazonaws.com",
+    "dialect": "postgres",
+    "logging": false,
+    "dialectOptions": {
+      "ssl": {
+        "require": true,
+        "rejectUnauthorized": false
+      }
+    }
+  },
+  "production": {
+    "username": "postgres",
+    "password": "AWSgonemad123",
+    "database": "mad_dalgo_warehouse",
+    "host": "mad-dalgo-db.cj44c6c8697a.ap-south-1.rds.amazonaws.com",
+    "dialect": "postgres",
+    "logging": false,
+    "dialectOptions": {
+      "ssl": {
+        "require": true,
+        "rejectUnauthorized": false
+      }
+    }
+  }
+}

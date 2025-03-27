@@ -7,6 +7,7 @@ const { generate: uniqueId } = require('shortid');
 const mongoose = require('mongoose');
 
 const setup = async (req, res) => {
+  console.log("setup function executed")
   const Admin = mongoose.model('Admin');
   const AdminPassword = mongoose.model('AdminPassword');
   const Setting = mongoose.model('Setting');

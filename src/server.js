@@ -2,6 +2,7 @@ require('module-alias/register');
 const mongoose = require('mongoose');
 const { globSync } = require('glob');
 const path = require('path');
+const { sequelize, connectDB } = require('../config/connectDb');
 
 // Make sure we are running node 7.6+
 const [major, minor] = process.versions.node.split('.').map(parseFloat);
@@ -14,11 +15,13 @@ if (major < 20) {
 require('dotenv').config({ path: '.env' });
 require('dotenv').config({ path: '.env.local' });
 
-mongoose.connect(process.env.DATABASE);
+// mongoose.connect(process.env.DATABASE);
 
-mongoose.connection.on('connected', () => {
-  console.log('✅ MongoDB Connected Successfully!');
-});
+// mongoose.connection.on('connected', () => {
+//   console.log('✅ MongoDB Connected Successfully!');
+// });
+
+connectDB()
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 

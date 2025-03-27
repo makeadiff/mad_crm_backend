@@ -4,6 +4,7 @@ const moment = require('moment');
 const InvoiceModel = mongoose.model('Invoice');
 
 const summary = async (Model, req, res) => {
+ 
   let defaultType = 'month';
   const { type } = req.query;
 
