@@ -45,8 +45,8 @@ module.exports = (sequelize) => {
       total_child_count: { type: DataTypes.INTEGER, allowNull: true },
       lead_source: { type: DataTypes.STRING, allowNull: false },
       classes: { type: DataTypes.ARRAY(DataTypes.STRING), allowNull: true },
-      low_income_resource: { type: DataTypes.BOOLEAN, defaultValue: false },
-      interested: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
+      low_income_resource: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: null },
+      interested: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: null },
     },
     {
       sequelize,

@@ -67,7 +67,7 @@ const update = async (req, res) => {
     }
     // console.log('partner details find in update.js :', partner.dataValues);
     // Update Partner
-    await Partner.update(
+    const partnerUpdate = await Partner.update(
       {
         partner_name,
         address_line_1,
@@ -86,7 +86,7 @@ const update = async (req, res) => {
       { where: { id: partnerId } }
     );
     
-    // console.log("partner table data updated")
+    console.log("partner table data updated :------------>", partnerUpdate)
 
     // Find latest partner agreement
     let latestAgreement = await PartnerAgreement.findOne({

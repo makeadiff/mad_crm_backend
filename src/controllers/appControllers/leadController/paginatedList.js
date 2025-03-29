@@ -18,7 +18,7 @@ const paginatedList = async (req, res) => {
 
   const { role, id: user_id } = req.user; // Extract role and user ID
 
-  console.log("user details on leads paginated list :", role, user_id)
+  // console.log("user details on leads paginated list :", role, user_id)
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.items) || 10;
   const offset = (page - 1) * limit;
@@ -129,7 +129,7 @@ const paginatedList = async (req, res) => {
       group: ['partner_id', 'id'],
     });
 
-    console.log('----------------------latest agreement found-----------------------');
+    // console.log('----------------------latest agreement found-----------------------');
 
     // **Step 3: Fetch Additional Partner Details**
     const partnersWithDetails = await Promise.all(
@@ -158,7 +158,7 @@ const paginatedList = async (req, res) => {
           total_child_count: partner.total_child_count || null,
           classes: partner.classes || null,
           low_income_resource: partner.low_income_resource || null,
-          interested: partner.interested || null,
+          interested: partner.interested,
           created_by: partner.created_by || null,
           conversion_stage: latestAgreement ? latestAgreement.conversion_stage : null,
           potential_child_count: latestAgreement ? latestAgreement.potential_child_count : null,

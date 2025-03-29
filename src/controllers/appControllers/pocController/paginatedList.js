@@ -143,7 +143,7 @@ const paginatedList = async (req, res) => {
         poc_designation: poc.poc_designation,
         createdAt: poc.createdAt,
         updatedAt: poc.updatedAt,
-
+        date_of_first_contact: poc.date_of_first_contact,
         // Partner details
         partner_id: partner.id || null,
         partner_name: partner.partner_name || null,

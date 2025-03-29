@@ -92,7 +92,7 @@ const create = async (req, res) => {
 
     console.log('------------->create.js partner_agreement is created<----------------- ');
 
-    return res.status(200).json({ message: 'Partner created successfully', partner });
+    return res.status(201).json({ message: 'Partner created successfully', partner });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Internal Server Error', error: error.message });
