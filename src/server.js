@@ -2,7 +2,7 @@ require('module-alias/register');
 const mongoose = require('mongoose');
 const { globSync } = require('glob');
 const path = require('path');
-const { sequelize, connectDB } = require('../config/connectDb');
+const { sequelize, connectDB } = require('../config/connectDB.js');
 
 // Make sure we are running node 7.6+
 const [major, minor] = process.versions.node.split('.').map(parseFloat);
@@ -42,7 +42,7 @@ for (const filePath of modelsFiles) {
 const app = require('./app');
 
 app.get("/", async(req, res) => {
-  res.send("Server is running")
+  res.send("Hello MAD, Server is running")
 })
 
 app.set('port', process.env.PORT || 8888);
