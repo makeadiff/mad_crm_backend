@@ -1,4 +1,4 @@
-const createAuthMiddleware = require('@/controllers/middlewaresControllers/createAuthMiddleware');
+const createAuthMiddleware = require('../../middlewaresControllers/createAuthMiddleware');
 // module.exports = createAuthMiddleware('Admin');
 
 module.exports = createAuthMiddleware();
