@@ -2,7 +2,7 @@ require('module-alias/register');
 const mongoose = require('mongoose');
 const { globSync } = require('glob');
 const path = require('path');
-const { sequelize, connectDB } = require('../config/connectDB.js');
+const { sequelize, connectDB } = require('../config/connectDB');
 
 // Make sure we are running node 7.6+
 const [major, minor] = process.versions.node.split('.').map(parseFloat);
