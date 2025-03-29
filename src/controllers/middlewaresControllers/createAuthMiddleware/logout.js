@@ -1,35 +1,46 @@
-const mongoose = require('mongoose');
+const { Op } = require("sequelize");
 
-const logout = async (req, res, { userModel }) => {
-  const UserPassword = mongoose.model(userModel + 'Password');
+const { UserPassword } = require('../../../../models');
 
-  // const token = req.cookies[`token_${cloud._id}`];
+const logout = async (req, res, { models }) => {
 
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Extract the token
+  // Extract token from Authorization header
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
 
-  if (token)
-    await UserPassword.findOneAndUpdate(
-      { user: req.admin._id },
-      { $pull: { loggedSessions: token } },
-      {
-        new: true,
-      }
-    ).exec();
-  else
-    await UserPassword.findOneAndUpdate(
-      { user: req.admin._id },
-      { loggedSessions: [] },
-      {
-        new: true,
-      }
-    ).exec();
+  try {
+    if (token) {
+      // Remove specific session token from loggedSessions array
+      await UserPassword.update(
+        {
+          loggedSessions: Sequelize.fn(
+            "array_remove",
+            Sequelize.col("loggedSessions"),
+            token
+          ),
+        },
+        { where: { user_id: req.admin.id } }
+      );
+    } else {
+      // Clear all sessions (Full Logout)
+      await UserPassword.update(
+        { loggedSessions: [] },
+        { where: { user_id: req.admin.id } }
+      );
+    }
 
-  return res.json({
-    success: true,
-    result: {},
-    message: 'Successfully logout',
-  });
+    return res.json({
+      success: true,
+      result: {},
+      message: "Successfully logged out",
+    });
+  } catch (error) {
+    console.error("Logout error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Logout failed",
+    });
+  }
 };
 
 module.exports = logout;
