@@ -36,6 +36,10 @@ app.use(fileUpload());
 
 // Here our API Routes
 
+app.get("/", (req, res) => {
+  res.send("Server is Running")
+})
+
 app.use('/api', coreAuthRouter);
 app.use('/api', adminAuth.isValidAuthToken, coreApiRouter);
 app.use('/api', adminAuth.isValidAuthToken, erpApiRouter);
