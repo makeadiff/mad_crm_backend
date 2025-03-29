@@ -2,7 +2,9 @@ const { Op } = require("sequelize");
 
 const { UserPassword } = require('../../../../models');
 
-const logout = async (req, res, { models }) => {
+const { Sequelize } = require('../../../../config/connectDB');  
+
+const logout = async (req, res) => {
 
   // Extract token from Authorization header
   const authHeader = req.headers["authorization"];
@@ -19,13 +21,13 @@ const logout = async (req, res, { models }) => {
             token
           ),
         },
-        { where: { user_id: req.admin.id } }
+        { where: { user_id: req.user.id } }
       );
     } else {
       // Clear all sessions (Full Logout)
       await UserPassword.update(
         { loggedSessions: [] },
-        { where: { user_id: req.admin.id } }
+        { where: { user_id: req.user.id } }
       );
     }
 
