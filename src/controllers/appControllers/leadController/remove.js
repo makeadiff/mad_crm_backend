@@ -1,42 +1,38 @@
-const Lead = require('@/models/appModels/Lead.js');
+const { Op } = require('sequelize');
+const Joi = require('joi');
+const { Partner, Poc, PocPartner } = require('../../../../models');
 
 const remove = async (req, res) => {
   try {
-    console.log("remove api hitted");
-    // Example: You could log who deleted this lead, or add audit fields
-    const updates = {
-      removed: true,
-      removedBy: req.user ? req.user._id : null, // Capture who removed the lead if you have `req.user`
-      removedAt: new Date(), // Optional timestamp
-    };
+    console.log('>>>>>>>>>>>>>>>>>>>partner/Lead delete api hitted<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
 
-    // Find the lead and soft-delete it
-    const result = await Lead.findOneAndUpdate(
-      { _id: req.params.id },
-      { $set: updates },
-      { new: true } // Return the updated document (soft-deleted version)
-    ).exec();
+    const partnerId = req.params.id;
 
-    if (!result) {
-      return res.status(404).json({
-        success: false,
-        result: null,
-        message: 'Lead not found',
-      });
+    // Find existing poc
+    const existedPartner = await Partner.findByPk(partnerId);
+    if (!existedPartner) {
+      return res.status(404).json({ success: false, message: 'Partner not found' });
     }
 
-    // Optional: Add post-delete hooks (like notifications or activity logs)
+    const partnerUpdate = await Partner.update(
+      {
+        removed: true
+      },
+      { where: { id: partnerId } }
+    );
 
-    return res.status(200).json({
-      success: true,
-      result,
-      message: 'Successfully marked the Lead as removed',
-    });
+    if (!partnerUpdate) {
+      return res.status(404).json({ success: false, message: 'Error deleting lead' });
+    }
+
+    return res
+      .status(200)
+      .json({ success: true, message: 'Lead Deleted Successfull'});
   } catch (error) {
+    console.error('Error deleting lead:', error);
     return res.status(500).json({
       success: false,
-      result: null,
-      message: 'Error removing the Lead',
+      message: 'Error deleting lead details',
       error: error.message,
     });
   }

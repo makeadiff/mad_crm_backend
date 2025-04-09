@@ -93,6 +93,9 @@ const paginatedList = async (req, res) => {
     queryConditions.id = { [Op.in]: coPocIds };
   }
 
+  //fetch only non-delted items
+  queryConditions.removed = false;
+
   try {
     // Fetch POC details with relations
     const { rows: pocList, count } = await Poc.findAndCountAll({

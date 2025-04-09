@@ -47,6 +47,7 @@ module.exports = (sequelize) => {
       classes: { type: DataTypes.ARRAY(DataTypes.STRING), allowNull: true },
       low_income_resource: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: null },
       interested: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: null },
+      removed: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
     },
     {
       sequelize,

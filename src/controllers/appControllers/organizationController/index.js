@@ -17,7 +17,7 @@
 const create = require('./create');
 // const read = require('./read');
 const update = require('./update');
-// const remove = require('./remove');
+const remove = require('./remove');
 // const search = require('./search');
 // const filter = require('./filter');
 // const summary = require('./summary');
@@ -28,7 +28,7 @@ module.exports = {
   create,
   // read,
   update,
-  // delete: remove,
+  delete: remove,
   // search,
   // filter,
   // summary,

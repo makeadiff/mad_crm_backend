@@ -273,7 +273,10 @@ const update = async (req, res) => {
 
         return res
           .status(200)
-          .json({ success: true, message: 'Successfully converted lead to interested.' });
+          .json({
+            success: true,
+            message: 'Lead is coverted successfully and shows in organisations tab'
+          });
       }
 
       if (conversion_stage === 'interested_but_facing_delay') {

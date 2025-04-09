@@ -21,6 +21,7 @@ module.exports = (sequelize) => {
       poc_contact: { type: DataTypes.BIGINT, allowNull: false },
       poc_email: { type: DataTypes.STRING, allowNull: false },
       date_of_first_contact: { type: DataTypes.DATE, allowNull: false },
+      removed: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
     },
     {
       sequelize,

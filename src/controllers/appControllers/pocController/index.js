@@ -14,10 +14,10 @@
 // module.exports = modelController();
 
 
-// const create = require('./create');
+const create = require('./create');
 // const read = require('./read');
-// const update = require('./update');
-// const remove = require('./remove');
+const update = require('./update');
+const remove = require('./remove');
 // const search = require('./search');
 // const filter = require('./filter');
 // const summary = require('./summary');
@@ -25,10 +25,10 @@
 const paginatedList = require('./paginatedList');
 
 module.exports = {
-  // create,
+  create,
   // read,
-  // update,
-  // delete: remove,
+  update,
+  delete: remove,
   // search,
   // filter,
   // summary,

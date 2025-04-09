@@ -26,7 +26,7 @@ const paginatedList = async (req, res) => {
 
   const searchableFields = ['partner_name', 'address_line_1', 'lead_source'];
   let whereCondition = {
-    id: { [Op.ne]: null }, // Default condition
+    id: { [Op.ne]: null }, 
   };
 
   if (searchQuery) {
@@ -64,7 +64,7 @@ const paginatedList = async (req, res) => {
     // Fetch partner IDs assigned directly to the manager
     const managerDirectPartners = (
       await Partner.findAll({
-        where: { created_by: user_id }, // Assuming 'created_by' stores the manager's ID
+        where: { created_by: user_id, removed: false}, // Assuming 'created_by' stores the manager's ID
         attributes: ['id'],
       })
     ).map((partner) => partner.id);
@@ -92,6 +92,9 @@ const paginatedList = async (req, res) => {
   } else {
     whereCondition.id = { [Op.notIn]: excludedPartnerIds };
   }
+
+  // this only fetch non-deleted lead/partner
+  whereCondition.removed = false
 
   try {
     // **Step 1: Fetch Partners with Pagination & City Name**
@@ -147,7 +150,7 @@ const paginatedList = async (req, res) => {
           address_line_1: partner.address_line_1,
           address_line_2: partner.address_line_2 || null,
           city_id: partner.city_id || null,
-          city: partner.city ? partner.city.city_name : null,
+          city_name: partner.city ? partner.city.city_name : null,
           state_id: partner.state_id || null,
           state_name: partner.state ? partner.state.state_name : null,
           pincode: partner.pincode || null,

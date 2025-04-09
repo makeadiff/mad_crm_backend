@@ -43,7 +43,7 @@ const paginatedList = async (req, res) => {
         attributes: ['co_id'],
       }).then((rows) => rows.map((row) => row.co_id));
 
-      console.log("cos under the manager in organization list :", managedCos)
+      // console.log("cos under the manager in organization list :", managedCos)
 
       let managedPartners = [];
       if (managedCos.length > 0) {
@@ -54,7 +54,7 @@ const paginatedList = async (req, res) => {
         }).then((rows) => rows.map((row) => row.partner_id));
       }
 
-      console.log("managed Partner list by manager of cos :", managedPartners)
+      // console.log("managed Partner list by manager of cos :", managedPartners)
 
       // Get partners created by this manager
       const selfCreatedPartners = await PartnerCo.findAll({
@@ -66,7 +66,7 @@ const paginatedList = async (req, res) => {
       partnerIds = [...new Set([...managedPartners, ...selfCreatedPartners])];
     } else if (role === 'co') {
 
-      console.log("finding organization list for cos")
+      // console.log("finding organization list for cos")
       // **Employee sees only partners assigned to them**
       const coPartners = await PartnerCo.findAll({
         where: { co_id: user_id },
@@ -81,6 +81,9 @@ const paginatedList = async (req, res) => {
     if (role === 'manager' || role === 'co') {
       whereCondition.id = { [Op.in]: partnerIds };
     }
+
+    //this can fetch only non-removed item
+    whereCondition.removed = false
 
     /** ✅ STEP 2: Fetch only partners where the latest agreement is "converted" **/
     const { rows: partners, count } = await Partner.findAndCountAll({
