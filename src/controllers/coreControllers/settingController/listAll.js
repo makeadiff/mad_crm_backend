@@ -1,29 +1,30 @@
-const mongoose = require('mongoose');
-const Model = mongoose.model('Setting');
+// const mongoose = require('mongoose');
+// const Model = mongoose.model('Setting');
 
 const listAll = async (req, res) => {
-  return res.status(201);
-  const sort = parseInt(req.query.sort) || 'desc';
+  return res.status(200);
 
-  //  Query the database for a list of all results
-  const result = await Model.find({
-    removed: false,
-    isPrivate: false,
-  }).sort({ created: sort });
+  // const sort = parseInt(req.query.sort) || 'desc';
 
-  if (result.length > 0) {
-    return res.status(200).json({
-      success: true,
-      result,
-      message: 'Successfully found all documents',
-    });
-  } else {
-    return res.status(203).json({
-      success: false,
-      result: [],
-      message: 'Collection is Empty',
-    });
-  }
+  // //  Query the database for a list of all results
+  // const result = await Model.find({
+  //   removed: false,
+  //   isPrivate: false,
+  // }).sort({ created: sort });
+
+  // if (result.length > 0) {
+  //   return res.status(200).json({
+  //     success: true,
+  //     result,
+  //     message: 'Successfully found all documents',
+  //   });
+  // } else {
+  //   return res.status(203).json({
+  //     success: false,
+  //     result: [],
+  //     message: 'Collection is Empty',
+  //   });
+  // }
 };
 
 module.exports = listAll;
