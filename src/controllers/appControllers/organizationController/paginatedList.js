@@ -13,7 +13,7 @@ const {
 } = require('../../../../models');
 
 const paginatedList = async (req, res) => {
-  console.log('Paginated list API hit for organization');
+  console.log('Paginated Organization list API hit for organization');
 
   const { id, role } = req.user; // Extract role from request
   const user_id = id;
@@ -142,6 +142,7 @@ const paginatedList = async (req, res) => {
           state_id: partner.state_id || null,
           pincode: partner.pincode || null,
           lead_source: partner.lead_source || null,
+          interested: partner.interested,
           school_type: partner.school_type || null,
           partner_affiliation_type: partner.partner_affiliation_type || null,
           total_child_count: partner.total_child_count || null,
@@ -182,6 +183,7 @@ const paginatedList = async (req, res) => {
           const meetings = await Meeting.findAll({ where: { partner_id: partner.id } });
 
           if (mou) {
+            partnerData.latest_mou_id = mou.id
             partnerData.mou_sign = mou.mou_sign;
             partnerData.mou_url = mou.mou_url;
             partnerData.mou_start_date = mou.mou_start_date;
