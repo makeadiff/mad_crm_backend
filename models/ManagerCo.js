@@ -25,6 +25,7 @@ module.exports = (sequelize) => {
       sequelize,
       modelName: 'ManagerCo',
       tableName: 'manager_co',
+      schema: 'prod',
       timestamps: true,
     }
   );

@@ -1,107 +1,80 @@
 // const bcrypt = require('bcryptjs');
 // const jwt = require('jsonwebtoken');
+// const { User, UserPassword } = require('../../../../models');
 
-// const authUser = async (req, res, { user, databasePassword, password, UserPasswordModel }) => {
-//   const isMatch = await bcrypt.compare(databasePassword.salt + password, databasePassword.password);
+// const authUser = async (req, res, { user, userPassword, password }) => {
+//   try {
+//     // Compare hashed password
+//     const isMatch = await bcrypt.compare(userPassword.salt + password, userPassword.password);
 
-//   if (!isMatch)
-//     return res.status(403).json({
-//       success: false,
-//       result: null,
-//       message: 'Invalid credentials.',
+//     if (!isMatch) {
+//       return res.status(403).json({
+//         success: false,
+//         result: null,
+//         message: 'Invalid credentials.',
+//       });
+//     }
+
+//     // Generate JWT token
+//     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+//       expiresIn: req.body.remember ? '365d' : '24h',
 //     });
 
-//   if (isMatch === true) {
-//     const token = jwt.sign(
-//       {
-//         id: user._id,
-//       },
-//       process.env.JWT_SECRET,
-//       { expiresIn: req.body.remember ? 365 * 24 + 'h' : '24h' }
-//     );
+//     // Update loggedSessions (assuming it's a JSON array)
+//     const newSessions = userPassword.loggedSessions
+//       ? [...userPassword.loggedSessions, token]
+//       : [token];
 
-//     await UserPasswordModel.findOneAndUpdate(
-//       { user: user._id },
-//       { $push: { loggedSessions: token } },
-//       {
-//         new: true,
-//       }
-//     ).exec();
+//     await UserPassword.update({ loggedSessions: newSessions }, { where: { user_id: user.id } });
 
-//     // .cookie(`token_${user.cloud}`, token, {
-//     //     maxAge: req.body.remember ? 365 * 24 * 60 * 60 * 1000 : null,
-//     //     sameSite: 'None',
-//     //     httpOnly: true,
-//     //     secure: true,
-//     //     domain: req.hostname,
-//     //     path: '/',
-//     //     Partitioned: true,
-//     //   })
+
+//     // Send response
 //     res.status(200).json({
 //       success: true,
 //       result: {
-//         _id: user._id,
-//         name: user.name,
-//         surname: user.surname,
+//         id: user.id,
+//         first_name: user.first_name,
+//         last_name: user.last_name,
 //         role: user.role,
 //         email: user.email,
 //         photo: user.photo,
 //         token: token,
 //         maxAge: req.body.remember ? 365 : null,
 //       },
-//       message: 'Successfully login user',
+//       message: 'Successfully logged in user',
 //     });
-//   } else {
-//     return res.status(403).json({
+//   } catch (error) {
+//     console.error('Auth Error:', error);
+//     return res.status(500).json({
 //       success: false,
-//       result: null,
-//       message: 'Invalid credentials.',
+//       message: 'Something went wrong. Please try again.',
+//       errorMessage: error.message,
 //     });
 //   }
 // };
 
 // module.exports = authUser;
 
-const bcrypt = require('bcryptjs');
+
 const jwt = require('jsonwebtoken');
-const { User, UserPassword } = require('../../../../models');
 
-const authUser = async (req, res, { user, userPassword, password }) => {
+const authUser = async (req, res, { user }) => {
   try {
-    // Compare hashed password
-    const isMatch = await bcrypt.compare(userPassword.salt + password, userPassword.password);
-
-    if (!isMatch) {
-      return res.status(403).json({
-        success: false,
-        result: null,
-        message: 'Invalid credentials.',
-      });
-    }
-
-    // Generate JWT token
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: user.user_id }, process.env.JWT_SECRET, {
       expiresIn: req.body.remember ? '365d' : '24h',
     });
 
-    // Update loggedSessions (assuming it's a JSON array)
-    const newSessions = userPassword.loggedSessions
-      ? [...userPassword.loggedSessions, token]
-      : [token];
+    // console.log("token :",token )
 
-    await UserPassword.update({ loggedSessions: newSessions }, { where: { user_id: user.id } });
-
-
-    // Send response
     res.status(200).json({
       success: true,
       result: {
-        id: user.id,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        role: user.role,
+        id: user.user_id,
+        first_name: user.user_display_name,
+        last_name: user.user_display_name,
+        photo: "abcd",
+        role: user.user_role,
         email: user.email,
-        photo: user.photo,
         token: token,
         maxAge: req.body.remember ? 365 : null,
       },

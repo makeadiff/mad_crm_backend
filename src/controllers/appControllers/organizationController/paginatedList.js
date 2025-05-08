@@ -15,7 +15,7 @@ const {
 const paginatedList = async (req, res) => {
   console.log('Paginated Organization list API hit for organization');
 
-  const { id, role } = req.user; // Extract role from request
+  const { user_id: id, user_role: role } = req.user; // Extract role from request
   const user_id = id;
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.items) || 10;
@@ -64,8 +64,7 @@ const paginatedList = async (req, res) => {
 
       // Combine both lists, ensuring unique partner IDs
       partnerIds = [...new Set([...managedPartners, ...selfCreatedPartners])];
-    } else if (role === 'co') {
-
+    } else if (role === 'CO Part Time' || role === 'CO Full Time') {
       // console.log("finding organization list for cos")
       // **Employee sees only partners assigned to them**
       const coPartners = await PartnerCo.findAll({
@@ -73,12 +72,12 @@ const paginatedList = async (req, res) => {
         attributes: ['partner_id'],
       }).then((rows) => rows.map((row) => row.partner_id));
 
-      console.log("co partners list for organization -------> ", coPartners)
+      console.log('co partners list for organization -------> ', coPartners);
       partnerIds = coPartners;
     }
 
     // Apply filtering for manager and employee
-    if (role === 'manager' || role === 'co') {
+    if (role === 'manager' || role === 'CO Part Time' || role === 'CO Full Time') {
       whereCondition.id = { [Op.in]: partnerIds };
     }
 
@@ -167,14 +166,14 @@ const paginatedList = async (req, res) => {
             {
               model: User,
               as: 'co',
-              attributes: ['id', 'first_name', 'last_name'],
+              attributes: ['user_id', 'user_display_name'],
             },
           ],
         });
 
         if (partnerCo && partnerCo.co) {
-          partnerData.co_id = partnerCo.co.id;
-          partnerData.co_name = `${partnerCo.co.first_name} ${partnerCo.co.last_name}`.trim();
+          partnerData.co_id = partnerCo.co.user_id;
+          partnerData.co_name = `${partnerCo.co.user_display_name}`.trim();
         }
 
         if (latestAgreement) {

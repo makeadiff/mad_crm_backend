@@ -12,8 +12,8 @@ const {
 const paginatedList = async (req, res) => {
   console.log('POC paginated list API hit');
 
-  const { role, id: user_id } = req.user; // Extract role and user ID
-  console.log('User Role & ID:', role, user_id);
+  const { user_role:role, user_id: user_id } = req.user; // Extract role and user ID
+  // console.log('User Role & ID:', role, user_id); 
 
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.items) || 10;
@@ -72,7 +72,7 @@ const paginatedList = async (req, res) => {
     // **6. Combine both lists (CO's POCs + Own POCs)**
     queryConditions.id = { [Op.in]: [...new Set([...managedPocIds, ...ownPocIds])] };
   } 
-  else if (role === 'co') {
+  else if (role === 'CO Part Time' || role === 'CO Full Time') {
     // **1. Get partner IDs where this CO is assigned**
     const coPartnerIds = (
       await PartnerCo.findAll({
@@ -122,7 +122,7 @@ const paginatedList = async (req, res) => {
                 {
                   model: User,
                   as: 'co',
-                  attributes: ['id', 'first_name', 'last_name', 'email'],
+                  attributes: ['user_id', 'user_display_name', 'email'],
                 },
               ],
             },
@@ -163,9 +163,9 @@ const paginatedList = async (req, res) => {
         low_income_resource: partner.low_income_resource || null,
 
         // CO (User) details
-        co_id: co.id || null,
-        co_name: `${co.first_name} ${co.last_name}` || null,
-        co_last_name: co.last_name || null,
+        co_id: co.user_id || null,
+        co_name: `${co.user_display_name}`.trim() || null,
+        // co_last_name: co.last_name || null,
         co_email: co.email || null,
       };
     });

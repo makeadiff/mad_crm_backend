@@ -36,6 +36,23 @@ module.exports = (sequelize) => {
 
   Partner.init(
     {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      created_by: {
+        type: DataTypes.DECIMAL,
+        allowNull: false,
+      },
+      state_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      city_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
       partner_name: { type: DataTypes.STRING, allowNull: false },
       address_line_1: { type: DataTypes.STRING, allowNull: false },
       address_line_2: { type: DataTypes.STRING, allowNull: true },
@@ -52,6 +69,7 @@ module.exports = (sequelize) => {
     {
       sequelize,
       modelName: 'Partner',
+      schema: 'prod',
       tableName: 'partners',
       timestamps: true,
     }

@@ -32,12 +32,13 @@ module.exports = (sequelize) => {
       current_status: { type: DataTypes.STRING, allowNull: true },
       expected_conversion_day: { type: DataTypes.INTEGER, allowNull: true },
       agreement_drop_date: { type: DataTypes.DATE, allowNull: true },
-      potential_child_count: { type: DataTypes.INTEGER, allowNull: true},
+      potential_child_count: { type: DataTypes.INTEGER, allowNull: true },
       removed: { type: DataTypes.BOOLEAN, defaultValue: false },
     },
     {
       sequelize,
       modelName: 'PartnerAgreement',
+      schema: 'prod',
       tableName: 'partner_agreements',
       timestamps: true,
     }

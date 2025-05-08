@@ -244,6 +244,27 @@ const update = async (req, res) => {
         //   `--------->${latestAgreement.conversion_stage} to interested ----->new partner agreement interested created`
         // );
 
+        const latestPocPartner = await Poc.findOne({
+           where: { partner_id: partnerId },
+           order: [['createdAt', 'DESC']], // Get the latest entry
+         });
+
+        if(!latestPocPartner){
+          const newPoc = await Poc.create({
+            partner_id: partnerId,
+            poc_name,
+            poc_designation,
+            poc_contact,
+            poc_email,
+            date_of_first_contact,
+          });
+
+          await PocPartner.create({
+            poc_id: newPoc.dataValues.id,
+            partner_id: partnerId,
+          });
+        }
+
         const newConvertedAgreement = await PartnerAgreement.create({
           partner_id: partnerId,
           conversion_stage: 'converted',

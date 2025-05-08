@@ -10,6 +10,9 @@ const sequelize = new Sequelize(
     port: 5432,
     dialect: 'postgres',
     logging: false,
+    define: {
+      schema: 'prod', // 👈 THIS sets default schema for all models
+    },
     dialectOptions: {
       ssl: {
         require: true,

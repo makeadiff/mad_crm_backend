@@ -23,7 +23,7 @@ const partnerSchema = Joi.object({
   lead_source: Joi.string().required(),
   classes: Joi.array().items(Joi.string()).allow(null),
   low_income_resource: Joi.boolean().default(false),
-  co_id: Joi.number().integer().required(),
+  co_id: Joi.number().required(),
 });
 
 const create = async (req, res) => {

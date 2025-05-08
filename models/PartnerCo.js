@@ -16,14 +16,15 @@ module.exports = (sequelize) => {
         references: { model: 'partners', key: 'id' },
       },
       co_id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.DECIMAL,
         allowNull: false,
-        references: { model: 'users', key: 'id' },
+        references: { model: 'users', key: 'user_id' },
       },
     },
     {
       sequelize,
       modelName: 'PartnerCo',
+      schema: 'prod',
       tableName: 'partner_cos',
       timestamps: true,
     }

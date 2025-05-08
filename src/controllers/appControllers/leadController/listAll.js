@@ -16,7 +16,7 @@ const {
 const listAllPartners = async (req, res) => {
   console.log('List all partners API hit');
 
-  const { role, id: user_id } = req.user; // Extract role and user ID
+  const { user_role: role, user_id: user_id } = req.user; // Extract role and user ID
   const { sortBy = 'createdAt', sortValue = 'DESC', q: searchQuery } = req.query;
 
   const searchableFields = ['partner_name', 'address_line_1', 'lead_source'];
@@ -52,7 +52,7 @@ const listAllPartners = async (req, res) => {
     ).map((partner) => partner.id);
 
     whereCondition.id = { [Op.in]: [...new Set([...managerCoPartners, ...managerDirectPartners])] };
-  } else if (role === 'co') {
+  } else if (role === 'CO Part Time' || role === 'CO Full Time') {
     const coPartners = (
       await PartnerCo.findAll({
         where: { co_id: user_id },
@@ -131,12 +131,12 @@ const listAllPartners = async (req, res) => {
         // Fetch CO details if conversion stage is "new"
         const partnerCo = await PartnerCo.findOne({
           where: { partner_id: partner.id },
-          include: [{ model: User, as: 'co', attributes: ['id', 'first_name', 'last_name'] }],
+          include: [{ model: User, as: 'co', attributes: ['user_id', 'user_display_name'] }],
         });
 
         if (partnerCo && partnerCo.co) {
-          partnerData.co_id = partnerCo.co.id;
-          partnerData.co_name = `${partnerCo.co.first_name} ${partnerCo.co.last_name}`.trim();
+          partnerData.co_id = partnerCo.co.user_id;
+          partnerData.co_name = `${partnerCo.co.user_display_name}`.trim();
         }
 
         if (latestAgreement && latestAgreement.conversion_stage !== 'new') {

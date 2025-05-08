@@ -12,9 +12,9 @@ module.exports = (sequelize) => {
   Meeting.init(
     {
       user_id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.DECIMAL,
         allowNull: false,
-        references: { model: 'users', key: 'id' },
+        references: { model: 'users', key: 'user_id' },
       },
       poc_id: {
         type: DataTypes.INTEGER,
@@ -34,6 +34,7 @@ module.exports = (sequelize) => {
       sequelize,
       modelName: 'Meeting',
       tableName: 'meetings',
+      schema: 'prod',
       timestamps: true,
     }
   );

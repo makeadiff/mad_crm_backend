@@ -16,7 +16,9 @@ const {
 const paginatedList = async (req, res) => {
   console.log('Paginated list API hit for partners');
 
-  const { role, id: user_id } = req.user; // Extract role and user ID
+  const { user_role:role, user_id: user_id } = req.user; // Extract role and user ID
+
+  // console.log("user role and user id :", role, user_id)
 
   // console.log("user details on leads paginated list :", role, user_id)
   const page = parseInt(req.query.page) || 1;
@@ -76,7 +78,7 @@ const paginatedList = async (req, res) => {
       [Op.in]: managerPartners,
       [Op.notIn]: excludedPartnerIds, // Ensure exclusion is still applied
     };
-  } else if (role === 'co') {
+  } else if (role === 'CO Part Time' || role === 'CO Full Time') {
     // Fetch partner IDs where the CO is assigned
     const coPartners = (
       await PartnerCo.findAll({
@@ -178,12 +180,12 @@ const paginatedList = async (req, res) => {
         // Fetch CO details if conversion stage is "new"
         const partnerCo = await PartnerCo.findOne({
           where: { partner_id: partner.id },
-          include: [{ model: User, as: 'co', attributes: ['id', 'first_name', 'last_name'] }],
+          include: [{ model: User, as: 'co', attributes: ['user_id', 'user_display_name'] }],
         });
 
         if (partnerCo && partnerCo.co) {
-          partnerData.co_id = partnerCo.co.id;
-          partnerData.co_name = `${partnerCo.co.first_name} ${partnerCo.co.last_name}`.trim();
+          partnerData.co_id = partnerCo.co.user_id;
+          partnerData.co_name = `${partnerCo.co.user_display_name}`.trim();
         }
 
         if (latestAgreement && latestAgreement.conversion_stage !== 'new') {
