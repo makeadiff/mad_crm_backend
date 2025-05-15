@@ -26,7 +26,7 @@ const paginatedList = async (req, res) => {
   const offset = (page - 1) * limit;
   const { sortBy = 'createdAt', sortValue = 'DESC', q: searchQuery } = req.query;
 
-  const searchableFields = ['partner_name', 'address_line_1', 'lead_source'];
+  const searchableFields = ['partner_name', 'address_line_1', 'lead_source',];
   let whereCondition = {
     id: { [Op.ne]: null }, 
   };
@@ -78,7 +78,7 @@ const paginatedList = async (req, res) => {
       [Op.in]: managerPartners,
       [Op.notIn]: excludedPartnerIds, // Ensure exclusion is still applied
     };
-  } else if (role === 'CO Part Time' || role === 'CO Full Time') {
+  } else if (role === 'CO Part Time' || role === 'CO Full Time' || role === 'CHO,CO Part Time') {
     // Fetch partner IDs where the CO is assigned
     const coPartners = (
       await PartnerCo.findAll({

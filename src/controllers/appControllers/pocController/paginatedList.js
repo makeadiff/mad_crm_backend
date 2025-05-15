@@ -72,7 +72,7 @@ const paginatedList = async (req, res) => {
     // **6. Combine both lists (CO's POCs + Own POCs)**
     queryConditions.id = { [Op.in]: [...new Set([...managedPocIds, ...ownPocIds])] };
   } 
-  else if (role === 'CO Part Time' || role === 'CO Full Time') {
+  else if (role === 'CO Part Time' || role === 'CO Full Time' || role === 'CHO,CO Part Time') {
     // **1. Get partner IDs where this CO is assigned**
     const coPartnerIds = (
       await PartnerCo.findAll({

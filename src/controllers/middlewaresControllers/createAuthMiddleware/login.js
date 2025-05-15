@@ -38,6 +38,23 @@ const login = async (req, res) => {
       });
     }
 
+    const allowedRoles = [
+      'Project Associate',
+      'Project Lead',
+      'Function Lead',
+      'CO Full Time',
+      'CO Part Time',
+      'CXO',
+      'CHO,CO Part Time',
+    ];
+
+    if (!allowedRoles.includes(user.user_role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have access to log in.',
+      });
+    }
+
     // Pick correct password (prioritize updated_password)
     const storedPassword = user.updated_password || user.password;
 

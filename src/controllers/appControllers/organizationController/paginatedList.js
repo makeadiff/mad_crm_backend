@@ -77,7 +77,7 @@ const paginatedList = async (req, res) => {
     }
 
     // Apply filtering for manager and employee
-    if (role === 'manager' || role === 'CO Part Time' || role === 'CO Full Time') {
+    if (role === 'manager' || role === 'CO Part Time' || role === 'CO Full Time' || role === 'CHO,CO Part Time') {
       whereCondition.id = { [Op.in]: partnerIds };
     }
 
