@@ -98,6 +98,11 @@ const paginatedList = async (req, res) => {
           attributes: ['id', 'city_name'],
         },
         {
+          model: State,
+          as: 'state',
+          attributes: ['id', 'state_name'],
+        },
+        {
           model: PartnerAgreement,
           as: 'agreements',
           where: { conversion_stage: 'converted' }, // ✅ Filter only converted agreements
@@ -140,6 +145,7 @@ const paginatedList = async (req, res) => {
           city_id: partner.city_id || null,
           city: partner.city ? partner.city.city_name : null,
           state_id: partner.state_id || null,
+          state: partner.state ? partner.state.state_name : null,
           pincode: partner.pincode || null,
           lead_source: partner.lead_source || null,
           interested: partner.interested,
