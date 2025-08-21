@@ -14,12 +14,17 @@ jobs:
     - name: Checkout Code (optional)
       uses: actions/checkout@v3
 
+    - name: Decode base64 private key
+      run: |
+        echo "${{ secrets.STAGING_KEY_BASE64 }}" | base64 -d > id_rsa
+        chmod 600 id_rsa
+
     - name: Deploy via SSH
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.STAGING_HOST }}
         username: ${{ secrets.STAGING_USER }}
-        key: ${{ secrets.STAGING_KEY }}
+        key_path: ./id_rsa
         script: |
           cd ${{ secrets.STAGING_PATH }}
           git reset --hard HEAD
