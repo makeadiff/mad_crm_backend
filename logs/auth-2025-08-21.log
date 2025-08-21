@@ -37,3 +37,5 @@
 [2025-08-21T09:19:28.677Z] INFO: Failed login attempt - invalid password | {"email":"gaurav.thwait@makeadiff.in","is_default_password":false,"login_attempts":1,"clientIP":"::1"}
 [2025-08-21T09:19:37.957Z] INFO: Successful login | {"email":"gaurav.thwait@makeadiff.in","user_id":"1924616.000000000","user_role":"Project Associate","is_first_time_login":false,"is_default_password":false,"login_duration_ms":339,"clientIP":"::1"}
 [2025-08-21T09:19:56.375Z] INFO: Password changed successfully | {"user_id":"1924616.000000000","email":"gaurav.thwait@makeadiff.in","was_first_time":false,"was_default_password":false,"clientIP":"::1"}
+[2025-08-21T10:11:15.590Z] INFO: Failed login attempt - invalid password | {"email":"gaurav.thwait@makeadiff.in","is_default_password":false,"login_attempts":1,"clientIP":"::1"}
+[2025-08-21T10:11:23.045Z] INFO: Successful login | {"email":"gaurav.thwait@makeadiff.in","user_id":"1924616.000000000","user_role":"Project Associate","is_first_time_login":false,"is_default_password":false,"login_duration_ms":320,"clientIP":"::1"}
