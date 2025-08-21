@@ -1,0 +1,31 @@
+[2025-08-20T10:29:04.718Z] INFO: First-time login password record created | {"email":"gaurav.thwait@makeadiff.in","user_id":"1924616.000000000","clientIP":"::1"}
+[2025-08-20T10:29:04.738Z] INFO: Successful login | {"email":"gaurav.thwait@makeadiff.in","user_id":"1924616.000000000","user_role":"Project Associate","is_first_time_login":true,"is_default_password":true,"login_duration_ms":901,"clientIP":"::1"}
+[2025-08-20T10:34:46.612Z] INFO: Successful login | {"email":"gaurav.thwait@makeadiff.in","user_id":"1924616.000000000","user_role":"Project Associate","is_first_time_login":false,"is_default_password":true,"login_duration_ms":416,"clientIP":"::1"}
+[2025-08-20T10:35:28.553Z] INFO: Failed login attempt - invalid password | {"email":"gaurav.thwait@makeadiff.in","is_default_password":true,"login_attempts":1,"clientIP":"::1"}
+[2025-08-20T10:36:03.999Z] INFO: Failed login attempt - invalid password | {"email":"gaurav.thwait@makeadiff.in","is_default_password":true,"login_attempts":2,"clientIP":"::1"}
+[2025-08-20T10:36:18.429Z] INFO: Successful login | {"email":"gaurav.thwait@makeadiff.in","user_id":"1924616.000000000","user_role":"Project Associate","is_first_time_login":false,"is_default_password":true,"login_duration_ms":200,"clientIP":"::1"}
+[2025-08-20T10:39:47.762Z] INFO: Successful login | {"email":"gaurav.thwait@makeadiff.in","user_id":"1924616.000000000","user_role":"Project Associate","is_first_time_login":false,"is_default_password":true,"login_duration_ms":462,"clientIP":"::1"}
+[2025-08-20T10:49:58.305Z] INFO: Failed login attempt - invalid password | {"email":"gaurav.thwait@makeadiff.in","is_default_password":true,"login_attempts":1,"clientIP":"::1"}
+[2025-08-20T10:50:05.413Z] INFO: Failed login attempt - invalid password | {"email":"gaurav.thwait@makeadiff.in","is_default_password":true,"login_attempts":2,"clientIP":"::1"}
+[2025-08-20T10:50:14.486Z] INFO: Failed login attempt - invalid password | {"email":"gaurav.thwait@makeadiff.in","is_default_password":true,"login_attempts":3,"clientIP":"::1"}
+[2025-08-20T10:50:20.918Z] INFO: Failed login attempt - invalid password | {"email":"gaurav.thwait@makeadiff.in","is_default_password":true,"login_attempts":4,"clientIP":"::1"}
+[2025-08-20T10:51:45.814Z] INFO: Successful login | {"email":"gaurav.thwait@makeadiff.in","user_id":"1924616.000000000","user_role":"Project Associate","is_first_time_login":false,"is_default_password":true,"login_duration_ms":475,"clientIP":"::1"}
+[2025-08-20T11:00:56.983Z] INFO: Failed login attempt - invalid password | {"email":"gaurav.thwait@makeadiff.in","is_default_password":true,"login_attempts":1,"clientIP":"::1"}
+[2025-08-20T11:00:57.455Z] INFO: Failed login attempt - invalid password | {"email":"gaurav.thwait@makeadiff.in","is_default_password":true,"login_attempts":2,"clientIP":"::1"}
+[2025-08-20T11:00:57.914Z] INFO: Failed login attempt - invalid password | {"email":"gaurav.thwait@makeadiff.in","is_default_password":true,"login_attempts":3,"clientIP":"::1"}
+[2025-08-20T11:00:57.993Z] INFO: Successful login | {"email":"gaurav.thwait@makeadiff.in","user_id":"1924616.000000000","user_role":"Project Associate","is_first_time_login":false,"is_default_password":true,"login_duration_ms":38,"clientIP":"::1"}
+[2025-08-20T11:01:50.111Z] INFO: Failed login attempt - invalid password | {"email":"gaurav.thwait@makeadiff.in","is_default_password":true,"login_attempts":1,"clientIP":"::1"}
+[2025-08-20T11:01:50.658Z] INFO: Failed login attempt - invalid password | {"email":"gaurav.thwait@makeadiff.in","is_default_password":true,"login_attempts":2,"clientIP":"::1"}
+[2025-08-20T11:01:51.120Z] INFO: Failed login attempt - invalid password | {"email":"gaurav.thwait@makeadiff.in","is_default_password":true,"login_attempts":3,"clientIP":"::1"}
+[2025-08-20T11:01:51.197Z] INFO: Successful login | {"email":"gaurav.thwait@makeadiff.in","user_id":"1924616.000000000","user_role":"Project Associate","is_first_time_login":false,"is_default_password":true,"login_duration_ms":36,"clientIP":"::1"}
+[2025-08-20T11:02:18.514Z] INFO: Successful login | {"email":"gaurav.thwait@makeadiff.in","user_id":"1924616.000000000","user_role":"Project Associate","is_first_time_login":false,"is_default_password":true,"login_duration_ms":210,"clientIP":"::1"}
+[2025-08-20T11:04:20.375Z] INFO: Successful login | {"email":"gaurav.thwait@makeadiff.in","user_id":"1924616.000000000","user_role":"Project Associate","is_first_time_login":false,"is_default_password":true,"login_duration_ms":194,"clientIP":"::1"}
+[2025-08-20T12:27:54.206Z] INFO: Password changed successfully | {"user_id":"1924616.000000000","email":"gaurav.thwait@makeadiff.in","was_first_time":false,"was_default_password":false,"clientIP":"::1"}
+[2025-08-20T12:28:45.847Z] INFO: Failed login attempt - invalid password | {"email":"gaurav.thwait@makeadiff.in","is_default_password":false,"login_attempts":1,"clientIP":"::1"}
+[2025-08-20T12:28:57.996Z] INFO: Failed login attempt - invalid password | {"email":"gaurav.thwait@makeadiff.in","is_default_password":false,"login_attempts":2,"clientIP":"::1"}
+[2025-08-20T12:31:42.454Z] INFO: Failed login attempt - invalid password | {"email":"gaurav.thwait@makeadiff.in","is_default_password":false,"login_attempts":3,"clientIP":"::1"}
+[2025-08-20T12:32:05.750Z] INFO: Failed login attempt - invalid password | {"email":"gaurav.thwait@makeadiff.in","is_default_password":false,"login_attempts":4,"clientIP":"::1"}
+[2025-08-20T12:36:01.458Z] INFO: Failed login attempt - invalid password | {"email":"gaurav.thwait@makeadiff.in","is_default_password":false,"login_attempts":5,"clientIP":"::1"}
+[2025-08-20T12:37:59.812Z] INFO: Failed login attempt - invalid password | {"email":"gaurav.thwait@makeadiff.in","is_default_password":false,"login_attempts":6,"clientIP":"::1"}
+[2025-08-20T12:38:26.124Z] INFO: First-time login attempt with non-default password | {"email":"gaurav.thwait@makeadiff.in","clientIP":"::1"}
+[2025-08-20T12:38:40.952Z] INFO: Successful login | {"email":"gaurav.thwait@makeadiff.in","user_id":"1924616.000000000","user_role":"Project Associate","is_first_time_login":false,"is_default_password":true,"login_duration_ms":211,"clientIP":"::1"}

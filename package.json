@@ -6,16 +6,35 @@
     "node": "20.9.0"
   },
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js --ignore public/",
-    "production": "NODE_ENV=production",
-    "setup": "node src/setup/setup.js",
-    "upgrade": "node src/setup/upgrade.js",
-    "reset": "node src/setup/reset.js"
-  },
+  "start": "node src/server.js",
+  "dev": "nodemon src/server.js --ignore public/",
+  "staging": "cross-env NODE_ENV=staging nodemon src/server.js",
+  "production": "cross-env NODE_ENV=production node src/server.js",
+
+  "setup": "node src/setup/setup.js",
+  "upgrade": "node src/setup/upgrade.js",
+
+  "db:migrate:dev": "cross-env NODE_ENV=development node scripts/db-manager.js migrate dev",
+  "db:seed:dev": "cross-env NODE_ENV=development node scripts/db-manager.js seed dev",
+  "db:status:dev": "cross-env NODE_ENV=development node scripts/db-manager.js status dev",
+  "db:reset:dev": "cross-env NODE_ENV=development node scripts/db-manager.js reset dev",
+
+  "db:migrate:staging": "cross-env NODE_ENV=staging node scripts/db-manager.js migrate staging",
+  "db:seed:staging": "cross-env NODE_ENV=staging node scripts/db-manager.js seed staging",
+  "db:status:staging": "cross-env NODE_ENV=staging node scripts/db-manager.js status staging",
+  "db:reset:staging": "cross-env NODE_ENV=staging node scripts/db-manager.js reset staging",
+
+  "db:migrate:prod": "cross-env NODE_ENV=production node scripts/db-manager.js migrate prod",
+  "db:status:prod": "cross-env NODE_ENV=production node scripts/db-manager.js status prod",
+
+  "sync:users:dev": "cross-env NODE_ENV=development DB_SCHEMA=mad_crm_dev node src/scripts/runUserSync.js --type=full",
+  "sync:users:staging": "cross-env NODE_ENV=staging DB_SCHEMA=mad_crm_staging node src/scripts/runUserSync.js --type=full",
+  "sync:users:prod": "cross-env NODE_ENV=production DB_SCHEMA=prod ALLOW_MIGRATIONS=false node src/scripts/runUserSync.js --type=full"
+},
   "dependencies": {
     "@aws-sdk/client-s3": "^3.758.0",
     "@aws-sdk/lib-storage": "^3.758.0",
+    "axios": "^1.11.0",
     "bcryptjs": "^2.4.3",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
@@ -49,6 +68,7 @@
     "transliteration": "^2.3.5"
   },
   "devDependencies": {
+    "cross-env": "^10.0.0",
     "nodemon": "3.0.1"
   },
   "_moduleAliases": {

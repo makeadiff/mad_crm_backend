@@ -152,6 +152,14 @@ const update = async (req, res) => {
 
         console.log(`---------> ${latestAgreement.conversion_stage} to dropped >>>>>>>>> first conversation created ----->`);
 
+        const findLatestPocPartner = await PocPartner.findOne({
+          where: { partner_id: partnerId },
+          order: [['updatedAt', 'DESC']], // Get the latest entry
+        });
+
+        if (!findLatestPocPartner) { 
+
+        console.log('(interested -> dropped)No existing POC partner found, creating new POC and partner details');
         const newPoc = await Poc.create({
           partner_id: partnerId,
           poc_name,
@@ -165,8 +173,7 @@ const update = async (req, res) => {
           `---------> ${latestAgreement.conversion_stage} to dropped >>>>>>>>> poc  created ----->`
         );
 
-
-        await PocPartner.create({
+         await PocPartner.create({
           poc_id: newPoc.dataValues.id,
           partner_id: partnerId,
         });
@@ -185,6 +192,7 @@ const update = async (req, res) => {
         console.log(
           `---------> ${latestAgreement.conversion_stage} to dropped >>>>>>>>> meeting created ----->`
         );
+      }
 
         const newAgreement = await PartnerAgreement.create({
           partner_id: partnerId,
@@ -224,7 +232,7 @@ const update = async (req, res) => {
           const originalName = req.body['mou_document[0][name]'] || 'uploaded-file.pdf'; // Get filename from request
 
           try {
-            mou_url = await uploadFileToS3(file, 'mou_documents', originalName); // Upload to S3
+            mou_url = await uploadFileToS3(file, process.env.FOLDER_ENTITY, originalName); // Upload to S3
             console.log('MOU uploaded URL:', mou_url);
           } catch (error) {
             console.error('Error uploading to S3:', error);

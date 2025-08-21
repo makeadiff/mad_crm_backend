@@ -108,6 +108,7 @@ const isValidAuthToken = async (req, res, next) => {
       });
     }
 
+    
     // Verify token
     const verified = jwt.verify(token, process.env.JWT_SECRET);
     if (!verified || !verified.id) {

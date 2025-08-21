@@ -69,7 +69,6 @@ module.exports = (sequelize) => {
     {
       sequelize,
       modelName: 'Partner',
-      schema: 'prod',
       tableName: 'partners',
       timestamps: true,
     }

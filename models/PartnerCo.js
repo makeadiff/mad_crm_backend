@@ -9,7 +9,12 @@ module.exports = (sequelize) => {
   }
 
   PartnerCo.init(
-    {
+    { 
+      id: {
+  type: DataTypes.INTEGER,
+  autoIncrement: true,
+  primaryKey: true
+},
       partner_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -18,13 +23,12 @@ module.exports = (sequelize) => {
       co_id: {
         type: DataTypes.DECIMAL,
         allowNull: false,
-        references: { model: 'users', key: 'user_id' },
+        references: { model: 'User', key: 'user_id' },
       },
     },
     {
       sequelize,
       modelName: 'PartnerCo',
-      schema: 'prod',
       tableName: 'partner_cos',
       timestamps: true,
     }

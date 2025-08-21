@@ -57,14 +57,38 @@
 
 
 const jwt = require('jsonwebtoken');
+const { UserPassword } = require('../../../../models');
 
-const authUser = async (req, res, { user }) => {
+const authUser = async (req, res, { user, userPassword }) => {
   try {
     const token = jwt.sign({ id: user.user_id }, process.env.JWT_SECRET, {
       expiresIn: req.body.remember ? '365d' : '24h',
     });
 
-    // console.log("token :",token )
+    // Update loggedSessions array with the new token
+    console.log('🔍 AuthUser debug:', {
+      hasUserPassword: !!userPassword,
+      userPasswordId: userPassword ? userPassword.id : 'null',
+      currentSessions: userPassword ? userPassword.loggedSessions : 'null',
+      userIdInt: parseInt(user.user_id)
+    });
+    
+    if (userPassword) {
+      const currentSessions = userPassword.loggedSessions || [];
+      const newSessions = [...currentSessions, token];
+      
+      console.log(`🔄 Updating sessions from ${currentSessions.length} to ${newSessions.length}`);
+      
+      const updateResult = await UserPassword.update(
+        { loggedSessions: newSessions },
+        { where: { user_id: parseInt(user.user_id) } }
+      );
+      
+      console.log(`✅ Update result:`, updateResult);
+      console.log(`✅ Token added to loggedSessions. Total sessions: ${newSessions.length}`);
+    } else {
+      console.log('❌ No userPassword provided to authUser');
+    }
 
     res.status(200).json({
       success: true,

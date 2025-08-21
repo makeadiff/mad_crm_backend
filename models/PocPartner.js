@@ -25,7 +25,6 @@ module.exports = (sequelize) => {
       sequelize,
       modelName: 'PocPartner',
       tableName: 'poc_partners',
-      schema: 'prod',
       timestamps: true,
     }
   );

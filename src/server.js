@@ -12,8 +12,10 @@ if (major < 20) {
 }
 
 // import environmental variables from our variables.env file
-require('dotenv').config({ path: '.env' });
-require('dotenv').config({ path: '.env.local' });
+require('dotenv').config(); // base fallback
+const env = process.env.NODE_ENV || 'development';
+require('dotenv').config({ path: `.env.${env}` });
+require('dotenv').config({ path: `.env.${env}.local` });     // Loads `.env.staging` when NODE_ENV=staging
 
 // mongoose.connect(process.env.DATABASE);
 
