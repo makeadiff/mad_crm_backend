@@ -1,0 +1,12 @@
+[2025-08-22T09:53:18.132Z] WARN: Login attempt for non-existent user | {"email":"gaurav.thwait@makekadiff.in","clientIP":"::1"}
+[2025-08-22T09:54:14.428Z] WARN: Login attempt for non-existent user | {"email":"gaurav.thwait@makekadiff.in","clientIP":"::1"}
+[2025-08-22T10:11:44.806Z] INFO: First-time login password record created | {"email":"amit.sharma@makeadiff.in","user_id":"1924601.000000000","clientIP":"::1"}
+[2025-08-22T10:11:44.830Z] INFO: Successful login | {"email":"amit.sharma@makeadiff.in","user_id":"1924601.000000000","user_role":"CO Part Time","is_first_time_login":true,"is_default_password":true,"login_duration_ms":899,"clientIP":"::1"}
+[2025-08-22T10:25:38.830Z] WARN: Login attempt for non-existent user | {"email":"gaurav.thwait@makekadiff.in","clientIP":"::1"}
+[2025-08-22T10:25:55.623Z] WARN: Login attempt for non-existent user | {"email":"gaurav.thwait@makekadiff.in","clientIP":"::1"}
+[2025-08-22T10:26:06.712Z] WARN: Login attempt for non-existent user | {"email":"gaurav.thwait@makekadiff.in","clientIP":"::1"}
+[2025-08-22T10:26:21.373Z] WARN: Login attempt for non-existent user | {"email":"gaurav.thwait@makekadiff.in","clientIP":"::1"}
+[2025-08-22T10:26:55.459Z] WARN: Login attempt for non-existent user | {"email":"gaurav.thwait@makekadiff.in","clientIP":"::1"}
+[2025-08-22T10:27:52.783Z] INFO: First-time login password record created | {"email":"gaurav.thwait@makeadiff.in","user_id":"1924616.000000000","clientIP":"::1"}
+[2025-08-22T10:27:52.802Z] INFO: Successful login | {"email":"gaurav.thwait@makeadiff.in","user_id":"1924616.000000000","user_role":"Project Associate","is_first_time_login":true,"is_default_password":true,"login_duration_ms":520,"clientIP":"::1"}
+[2025-08-22T10:40:03.617Z] INFO: Successful login | {"email":"gaurav.thwait@makeadiff.in","user_id":"1924616.000000000","user_role":"Project Associate","is_first_time_login":false,"is_default_password":true,"login_duration_ms":298,"clientIP":"::1"}

@@ -27,6 +27,7 @@ const DEFAULT_SCHEMAS = {
 
 // Fallback schema if not explicitly set in env
 const schema = process.env.DB_SCHEMA || DEFAULT_SCHEMAS[env];
+console.log(`Using DB schema: ${schema}`);
 
 // Logging toggle
 const logging = (process.env.DB_LOGGING || '').toLowerCase() === 'true';

@@ -253,6 +253,81 @@ function logSyncSummary(summaryLog) {
 }
 
 /**
+ * Create a dedicated completion log file with custom naming
+ * @param {Object} summaryLog - Summary statistics object
+ */
+function createCompletionLogFile(summaryLog) {
+  try {
+    ensureLogDirectory();
+    
+    // Create timestamp for filename: YYYY-MM-DD_HH-MM-SS
+    const now = new Date();
+    const dateTime = now.toISOString()
+      .replace(/T/, '_')
+      .replace(/:/g, '-')
+      .replace(/\..+/, ''); // Remove milliseconds and timezone
+    
+    // Create filename: completed_sync_log_YYYY-MM-DD_HH-MM-SS.log
+    const filename = `completed_sync_log_${dateTime}.log`;
+    const filePath = path.join(LOG_DIR, filename);
+    
+    // Prepare detailed log content
+    const logContent = [
+      '='.repeat(80),
+      `SYNC COMPLETION REPORT`,
+      '='.repeat(80),
+      `Sync Type: ${summaryLog.syncType}`,
+      `Completion Time: ${now.toISOString()}`,
+      `Duration: ${summaryLog.durationSeconds} seconds`,
+      '',
+      'SYNC STATISTICS:',
+      '-'.repeat(40),
+      `Total Users Processed: ${summaryLog.totalUsers}`,
+      `Users Created: ${summaryLog.created}`,
+      `Users Updated: ${summaryLog.updated}`,
+      `Users Skipped: ${summaryLog.skipped}`,
+      `Errors Encountered: ${summaryLog.errors}`,
+      `Success Rate: ${summaryLog.successRate}`,
+      '',
+      'SYNC STATUS:',
+      '-'.repeat(40),
+      `Status: ${summaryLog.failed ? 'FAILED' : 'COMPLETED SUCCESSFULLY'}`,
+      summaryLog.failed ? `Error Message: ${summaryLog.errorMessage}` : '',
+      '',
+      'DETAILED BREAKDOWN:',
+      '-'.repeat(40),
+      `Start Time: ${new Date(now.getTime() - (summaryLog.durationSeconds * 1000)).toISOString()}`,
+      `End Time: ${now.toISOString()}`,
+      `Processing Rate: ${summaryLog.totalUsers > 0 ? (summaryLog.totalUsers / summaryLog.durationSeconds).toFixed(2) : 0} users/second`,
+      '',
+      summaryLog.failed ? 'SYNC FAILED - CHECK ERROR LOGS FOR DETAILS' : 'SYNC COMPLETED SUCCESSFULLY',
+      '='.repeat(80),
+      ''
+    ].filter(line => line !== false && line !== '').join('\n');
+    
+    // Write to dedicated completion log file
+    fs.writeFileSync(filePath, logContent, 'utf8');
+    
+    console.log(`✅ Completion log saved: ${filename}`);
+    console.log(`📁 Log file location: ${filePath}`);
+    
+    return {
+      success: true,
+      filename,
+      filePath,
+      size: logContent.length
+    };
+    
+  } catch (error) {
+    console.error('Failed to create completion log file:', error.message);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+}
+
+/**
  * Log sync operation error
  * @param {string} syncType - Type of sync operation
  * @param {Error} error - Error object
@@ -364,6 +439,7 @@ module.exports = {
   logSyncStart,
   logSyncComplete,
   logSyncSummary,
+  createCompletionLogFile,
   logSyncError,
   logAuthAttempt,
   logSecurityEvent,

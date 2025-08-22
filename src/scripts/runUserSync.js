@@ -231,6 +231,13 @@ async function run(options) {
       // Log detailed summary to dedicated file
       console.log('Writing sync summary to log file...');
       logger.logSyncSummary(summaryLog);
+      
+      // Create dedicated completion log file with custom naming
+      console.log('Creating completion log file...');
+      const completionLogResult = logger.createCompletionLogFile(summaryLog);
+      if (!completionLogResult.success) {
+        console.error('Failed to create completion log file:', completionLogResult.error);
+      }
 
 
       // Exit with appropriate code
@@ -261,6 +268,13 @@ async function run(options) {
         
         console.log('Writing failed sync summary to log file...');
         logger.logSyncSummary(summaryLog);
+        
+        // Create dedicated completion log file for failed sync
+        console.log('Creating completion log file for failed sync...');
+        const completionLogResult = logger.createCompletionLogFile(summaryLog);
+        if (!completionLogResult.success) {
+          console.error('Failed to create completion log file:', completionLogResult.error);
+        }
       }
 
       process.exit(1);
