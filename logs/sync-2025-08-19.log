@@ -1,5 +1,0 @@
-[2025-08-19T10:44:22.947Z] INFO: Starting full sync operation | {"syncType":"full","options":{"type":"full","batchSize":100,"stopOnError":false,"dryRun":false,"since":null,"filters":null},"timestamp":"2025-08-19T10:44:22.946Z"}
-[2025-08-19T10:51:34.423Z] INFO: Starting full sync operation | {"syncType":"full","options":{"type":"full","batchSize":100,"stopOnError":false,"dryRun":false,"since":null,"filters":null},"timestamp":"2025-08-19T10:51:34.421Z"}
-[2025-08-19T10:57:36.504Z] INFO: Starting full sync operation | {"syncType":"full","options":{"type":"full","batchSize":100,"stopOnError":false,"dryRun":false,"since":null,"filters":null},"timestamp":"2025-08-19T10:57:36.503Z"}
-[2025-08-19T11:17:37.281Z] INFO: Starting full sync operation | {"syncType":"full","options":{"type":"full","batchSize":100,"stopOnError":false,"dryRun":false,"since":null,"filters":null},"timestamp":"2025-08-19T11:17:37.280Z"}
-[2025-08-19T11:27:34.118Z] INFO: Starting full sync operation | {"syncType":"full","options":{"type":"full","batchSize":100,"stopOnError":false,"dryRun":false,"since":null,"filters":null},"timestamp":"2025-08-19T11:27:34.116Z"}
