@@ -7,3 +7,4 @@ notes.md
 
 *.pdf
 .env*
+logs/
