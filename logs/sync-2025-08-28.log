@@ -1,0 +1,1 @@
+[2025-08-28T10:25:04.661Z] INFO: Starting full sync operation | {"syncType":"full","options":{"type":"full","batchSize":100,"stopOnError":false,"dryRun":false,"since":null,"filters":null},"timestamp":"2025-08-28T10:25:04.661Z"}
