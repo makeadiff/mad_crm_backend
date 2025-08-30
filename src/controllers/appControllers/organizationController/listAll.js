@@ -176,6 +176,9 @@ const paginatedList = async (req, res) => {
               attributes: ['id', 'first_name', 'last_name'],
             },
           ],
+          order: [
+            ['createdAt', 'DESC'],   // newest first
+            ],
         });
 
         if (partnerCo && partnerCo.co) {
