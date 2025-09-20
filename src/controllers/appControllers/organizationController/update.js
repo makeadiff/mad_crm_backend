@@ -112,7 +112,16 @@ const update = async (req, res) => {
         console.error('Error uploading to S3:', error);
         return res.status(500).json({ success: false, message: 'File upload failed' });
       }
-      const updateMou = await Mou.update(
+      const inactiveLastMou = await Mou.update(
+        {
+          partner_id: partnerId,
+          mou_status: 'inactive',
+        },
+        { where: { id: latest_mou_id } }
+      );
+
+
+      const createNewMou = await Mou.create(
         {
           partner_id: partnerId,
           mou_sign: true,
@@ -122,8 +131,7 @@ const update = async (req, res) => {
           mou_status: 'active',
           confirmed_child_count,
           mou_url,
-        },
-        { where: { id: latest_mou_id } }
+        }
       );
 
       // console.log("yess mou is updated and the details are :", updateMou)
