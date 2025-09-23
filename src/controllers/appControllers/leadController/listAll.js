@@ -140,7 +140,7 @@ const listAllPartners = async (req, res) => {
         }
 
         if (latestAgreement && latestAgreement.conversion_stage !== 'new') {
-          const mou = await Mou.findOne({ where: { partner_id: partner.id } });
+          const mou = await Mou.findOne({ where: { partner_id: partner.id, mou_status: 'active' } });
           const meetings = await Meeting.findAll({ where: { partner_id: partner.id } });
 
           if (mou) {

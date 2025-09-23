@@ -188,7 +188,7 @@ const paginatedList = async (req, res) => {
 
         if (latestAgreement) {
           // Fetch MOU and Meeting details
-          const mou = await Mou.findOne({ where: { partner_id: partner.id } });
+          const mou = await Mou.findOne({ where: { partner_id: partner.id, mou_status: 'active' }, order: [['createdAt', 'DESC']] });
           const meetings = await Meeting.findAll({ where: { partner_id: partner.id } });
 
           if (mou) {

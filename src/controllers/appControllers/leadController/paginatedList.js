@@ -14,7 +14,7 @@ const {
 } = require('../../../../models');
 
 const paginatedList = async (req, res) => {
-  console.log('Paginated list API hit for partners');
+  console.log('Paginated lead list API hit for partners');
 
   const { user_role:role, user_id: user_id } = req.user; // Extract role and user ID
 
@@ -189,7 +189,8 @@ const paginatedList = async (req, res) => {
         }
 
         if (latestAgreement && latestAgreement.conversion_stage !== 'new') {
-          const mou = await Mou.findOne({ where: { partner_id: partner.id } });
+          console.log('Fetching MOU and Meeting details for partner ID:', partner.id);
+          const mou = await Mou.findAll({ where: { partner_id: partner.id, mou_status: 'active' }, order: [['createdAt', 'DESC']] });
           const meetings = await Meeting.findAll({ where: { partner_id: partner.id } });
 
           if (mou) {
