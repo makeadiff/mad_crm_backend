@@ -141,6 +141,14 @@ module.exports = (sequelize) => {
         type: DataTypes.ARRAY(DataTypes.STRING), 
         defaultValue: [] 
       },
+      reset_token_expires_at: {
+        type: DataTypes.DATE,
+        allowNull: true
+      },
+      reset_used_at: {
+        type: DataTypes.DATE,
+        allowNull: true
+      },
     },
     {
       sequelize,

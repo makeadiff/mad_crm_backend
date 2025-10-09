@@ -6,31 +6,26 @@
     "node": "20.9.0"
   },
   "scripts": {
-  "start": "node src/server.js",
-  "dev": "nodemon src/server.js --ignore public/",
-  "staging": "cross-env NODE_ENV=staging PORT=7777 nodemon src/server.js",
-  "production": "cross-env NODE_ENV=production PORT=8888 node src/server.js",
-
-  "setup": "node src/setup/setup.js",
-  "upgrade": "node src/setup/upgrade.js",
-
-  "db:migrate:dev": "cross-env NODE_ENV=development node scripts/db-manager.js migrate dev",
-  "db:seed:dev": "cross-env NODE_ENV=development node scripts/db-manager.js seed dev",
-  "db:status:dev": "cross-env NODE_ENV=development node scripts/db-manager.js status dev",
-  "db:reset:dev": "cross-env NODE_ENV=development node scripts/db-manager.js reset dev",
-
-  "db:migrate:staging": "cross-env NODE_ENV=staging node scripts/db-manager.js migrate staging",
-  "db:seed:staging": "cross-env NODE_ENV=staging node scripts/db-manager.js seed staging",
-  "db:status:staging": "cross-env NODE_ENV=staging node scripts/db-manager.js status staging",
-  "db:reset:staging": "cross-env NODE_ENV=staging node scripts/db-manager.js reset staging",
-
-  "db:migrate:prod": "cross-env NODE_ENV=production node scripts/db-manager.js migrate prod",
-  "db:status:prod": "cross-env NODE_ENV=production node scripts/db-manager.js status prod",
-
-  "sync:users:dev": "cross-env NODE_ENV=development DB_SCHEMA=mad_crm_dev node src/scripts/runUserSync.js --type=full",
-  "sync:users:staging": "cross-env NODE_ENV=staging DB_SCHEMA=mad_crm_staging node src/scripts/runUserSync.js --type=full",
-  "sync:users:prod": "cross-env NODE_ENV=production DB_SCHEMA=prod ALLOW_MIGRATIONS=false node src/scripts/runUserSync.js --type=full"
-},
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js --ignore public/",
+    "staging": "cross-env NODE_ENV=staging PORT=7777 nodemon src/server.js",
+    "production": "cross-env NODE_ENV=production PORT=8888 node src/server.js",
+    "setup": "node src/setup/setup.js",
+    "upgrade": "node src/setup/upgrade.js",
+    "db:migrate:dev": "cross-env NODE_ENV=development node scripts/db-manager.js migrate dev",
+    "db:seed:dev": "cross-env NODE_ENV=development node scripts/db-manager.js seed dev",
+    "db:status:dev": "cross-env NODE_ENV=development node scripts/db-manager.js status dev",
+    "db:reset:dev": "cross-env NODE_ENV=development node scripts/db-manager.js reset dev",
+    "db:migrate:staging": "cross-env NODE_ENV=staging node scripts/db-manager.js migrate staging",
+    "db:seed:staging": "cross-env NODE_ENV=staging node scripts/db-manager.js seed staging",
+    "db:status:staging": "cross-env NODE_ENV=staging node scripts/db-manager.js status staging",
+    "db:reset:staging": "cross-env NODE_ENV=staging node scripts/db-manager.js reset staging",
+    "db:migrate:prod": "cross-env NODE_ENV=production node scripts/db-manager.js migrate prod",
+    "db:status:prod": "cross-env NODE_ENV=production node scripts/db-manager.js status prod",
+    "sync:users:dev": "cross-env NODE_ENV=development DB_SCHEMA=mad_crm_dev node src/scripts/runUserSync.js --type=full",
+    "sync:users:staging": "cross-env NODE_ENV=staging DB_SCHEMA=mad_crm_staging node src/scripts/runUserSync.js --type=full",
+    "sync:users:prod": "cross-env NODE_ENV=production DB_SCHEMA=prod ALLOW_MIGRATIONS=false node src/scripts/runUserSync.js --type=full"
+  },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.758.0",
     "@aws-sdk/lib-storage": "^3.758.0",
@@ -61,10 +56,10 @@
     "pg": "^8.13.3",
     "pg-hstore": "^2.3.4",
     "pug": "^3.0.2",
-    "resend": "^2.0.0",
     "sequelize": "^6.37.6",
     "sequelize-cli": "^6.6.2",
     "shortid": "^2.2.16",
+    "sib-api-v3-sdk": "^8.5.0",
     "transliteration": "^2.3.5"
   },
   "devDependencies": {

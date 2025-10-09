@@ -1,26 +1,25 @@
+const { transactionalEmailsApi, SibApiV3Sdk } = require('../../../config/brevoConfig');
 const { passwordVerfication } = require('../../../emailTemplate/emailVerfication');
 
-const { Resend } = require('resend');
+const sendMail = async ({ email, name, link, subject = "Verify your email"}) => {
+  const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
 
-const sendMail = async ({
-  email,
-  name,
-  link,
-  idurar_app_email,
-  subject = 'Verify your email | idurar',
-  type = 'emailVerfication',
-  emailToken,
-}) => {
-  const resend = new Resend(process.env.RESEND_API);
+  sendSmtpEmail.to = [{ email }];
+  sendSmtpEmail.sender = { 
+  name: "Make A Difference", 
+  email: "no-reply@makeadiff.in" 
+  };
+  sendSmtpEmail.subject = subject;
+  sendSmtpEmail.htmlContent = passwordVerfication({ name, link });
 
-  const { data } = await resend.emails.send({
-    from: idurar_app_email,
-    to: email,
-    subject,
-    html: passwordVerfication({ name, link }),
-  });
-
-  return data;
+  try {
+    const data = await transactionalEmailsApi.sendTransacEmail(sendSmtpEmail);
+    console.log("✅ Email sent:", data);
+    return data;
+  } catch (error) {
+    console.error("❌ Brevo sendMail error:", error.response?.text || error.message);
+    throw error;
+  }
 };
 
 module.exports = sendMail;
