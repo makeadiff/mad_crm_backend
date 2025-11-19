@@ -1,4 +1,4 @@
-const { Op } = require('sequelize');
+const { Op, literal } = require('sequelize');
 const {
   Partner,
   PartnerAgreement,
@@ -10,17 +10,16 @@ const {
   Poc,
   PocPartner,
   ManagerCo,
-  State
+  State,
 } = require('../../../../models');
-const { orderBy } = require('lodash');
 
 const paginatedList = async (req, res) => {
   console.log('Paginated Organization list API hit for organization');
 
-  const { user_id: id, user_role: role } = req.user; // Extract role from request
+  const { user_id: id, user_role: role } = req.user;
   const user_id = id;
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.items) || 10;
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.items, 10) || 10;
   const offset = (page - 1) * limit;
 
   const { sortBy = 'createdAt', sortValue = 'DESC', q: searchQuery } = req.query;
@@ -38,55 +37,63 @@ const paginatedList = async (req, res) => {
     /** ✅ STEP 1: ROLE-BASED FILTERING **/
     let partnerIds = [];
 
-      if (role === 'manager') {
-      // Get COs managed by this manager
-      const managedCos = await ManagerCo.findAll({
-        where: { manager_id: user_id },
-        attributes: ['co_id'],
-      }).then((rows) => rows.map((row) => row.co_id));
-
-      // console.log("cos under the manager in organization list :", managedCos)
+    if (role === 'manager') {
+      // COs managed by this manager
+      const managedCos = (
+        await ManagerCo.findAll({
+          where: { manager_id: user_id },
+          attributes: ['co_id'],
+        })
+      ).map((row) => row.co_id);
 
       let managedPartners = [];
       if (managedCos.length > 0) {
-        // Get partners assigned to these COs
-        managedPartners = await PartnerCo.findAll({
-          where: { co_id: { [Op.in]: managedCos } },
-          attributes: ['partner_id'],
-        }).then((rows) => rows.map((row) => row.partner_id));
+        managedPartners = (
+          await PartnerCo.findAll({
+            where: { co_id: { [Op.in]: managedCos } },
+            attributes: ['partner_id'],
+          })
+        ).map((row) => row.partner_id);
       }
 
-      // console.log("managed Partner list by manager of cos :", managedPartners)
+      // Partners where this manager is CO directly (similar to your intent)
+      const selfCreatedPartners = (
+        await PartnerCo.findAll({
+          where: { co_id: user_id },
+          attributes: ['partner_id'],
+        })
+      ).map((row) => row.partner_id);
 
-      // Get partners created by this manager
-      const selfCreatedPartners = await PartnerCo.findAll({
-        where: { co_id: user_id },
-        attributes: ['id'],
-      }).then((rows) => rows.map((row) => row.id));
-
-      // Combine both lists, ensuring unique partner IDs
       partnerIds = [...new Set([...managedPartners, ...selfCreatedPartners])];
-    } else if (role === 'CO Part Time' || role === 'CO Full Time') {
-      // console.log("finding organization list for cos")
-      // **Employee sees only partners assigned to them**
-      const coPartners = await PartnerCo.findAll({
-        where: { co_id: user_id },
-        attributes: ['partner_id'],
-      }).then((rows) => rows.map((row) => row.partner_id));
+    } else if (
+      role === 'CO Part Time' ||
+      role === 'CO Full Time' ||
+      role === 'CHO,CO Part Time'
+    ) {
+      // CO & CHO-CO sees only partners assigned to them
+      const coPartners = (
+        await PartnerCo.findAll({
+          where: { co_id: user_id },
+          attributes: ['partner_id'],
+        })
+      ).map((row) => row.partner_id);
 
-      console.log('co partners list for organization -------> ', coPartners);
       partnerIds = coPartners;
     }
 
-    // Apply filtering for manager and employee
-    if (role === 'manager' || role === 'CO Part Time' || role === 'CO Full Time' || role === 'CHO,CO Part Time') {
+    if (
+      role === 'manager' ||
+      role === 'CO Part Time' ||
+      role === 'CO Full Time' ||
+      role === 'CHO,CO Part Time'
+    ) {
       whereCondition.id = { [Op.in]: partnerIds };
     }
 
-    //this can fetch only non-removed item
-    whereCondition.removed = false
+    // If you want only non-removed orgs, uncomment:
+    // whereCondition.removed = false;
 
-    /** ✅ STEP 2: Fetch only partners where the latest agreement is "converted" **/
+    /** ✅ STEP 2: Fetch partners whose *latest* agreement is "converted" **/
     const { rows: partners, count } = await Partner.findAndCountAll({
       where: whereCondition,
       limit,
@@ -106,136 +113,215 @@ const paginatedList = async (req, res) => {
         {
           model: PartnerAgreement,
           as: 'agreements',
-          where: { conversion_stage: 'converted' }, // ✅ Filter only converted agreements
-          attributes: ['id', 'partner_id', 'conversion_stage', 'createdAt'],
-          required: true, // ✅ Ensures only partners with a converted agreement are fetched
+          required: true,
+          attributes: [
+            'id',
+            'partner_id',
+            'conversion_stage',
+            'createdAt',
+            'potential_child_count',
+            'current_status',
+            'expected_conversion_day',
+            'non_conversion_reason',
+            'specific_doc_name',
+            'specific_doc_required',
+          ],
+          where: {
+            conversion_stage: 'converted',
+            createdAt: {
+              [Op.eq]: literal(`(
+                SELECT MAX("pa2"."createdAt")
+                FROM "partner_agreements" AS "pa2"
+                WHERE "pa2"."partner_id" = "agreements"."partner_id"
+              )`),
+            },
+          },
         },
       ],
     });
 
-    /** ✅ STEP 3: Fetch additional details **/
-    const partnerIdsList = partners.map((partner) => partner.id);
+    if (!partners.length) {
+      return res.status(200).json({
+        success: true,
+        result: [],
+        pagination: { page, pages: 0, count: 0 },
+        message: 'No organizations found',
+      });
+    }
 
-    const latestAgreements = await PartnerAgreement.findAll({
-      where: { partner_id: partnerIdsList, conversion_stage: 'converted' },
-      order: [['createdAt', 'DESC']],
-      group: ['partner_id', 'id'],
-    });
+    const partnerIdsList = partners.map((p) => p.id);
 
-    const latestPocPartners = await PocPartner.findAll({
+    /** ✅ STEP 3: Agreements for tracking_history (all stages) **/
+    const agreementsForPage = await PartnerAgreement.findAll({
       where: { partner_id: partnerIdsList },
-      order: [['createdAt', 'DESC']],
-      group: ['partner_id', 'id'],
+      attributes: ['partner_id', 'conversion_stage', 'createdAt'],
+      order: [['partner_id', 'ASC'], ['createdAt', 'ASC']],
+      raw: true,
     });
 
-    const partnersWithDetails = await Promise.all(
-      partners.map(async (partner) => {
-        const latestAgreement = latestAgreements.find(
-          (agreement) => agreement.partner_id === partner.id
-        );
+    const historyMap = new Map(); // partner_id -> [ { stage, createdAt } ]
+    for (const a of agreementsForPage) {
+      if (!historyMap.has(a.partner_id)) historyMap.set(a.partner_id, []);
+      historyMap.get(a.partner_id).push({
+        stage: a.conversion_stage,
+        createdAt: a.createdAt,
+      });
+    }
 
-        const latestPocPartner = latestPocPartners.find(
-          (pocPartner) => pocPartner.partner_id === partner.id
-        );
+    /** ✅ STEP 4: Latest POC per partner (PocPartner + Poc bulk) **/
+    const pocPartners = await PocPartner.findAll({
+      where: { partner_id: partnerIdsList },
+      attributes: ['partner_id', 'poc_id', 'createdAt'],
+      order: [['partner_id', 'ASC'], ['createdAt', 'ASC']],
+      raw: true,
+    });
 
-        let partnerData = {
-          id: partner.id,
-          partner_name: partner.partner_name,
-          address_line_1: partner.address_line_1,
-          address_line_2: partner.address_line_2 || null,
-          city_id: partner.city_id || null,
-          city: partner.city ? partner.city.city_name : null,
-          state_id: partner.state_id || null,
-          state: partner.state ? partner.state.state_name : null,
-          pincode: partner.pincode || null,
-          lead_source: partner.lead_source || null,
-          interested: partner.interested,
-          school_type: partner.school_type || null,
-          partner_affiliation_type: partner.partner_affiliation_type || null,
-          total_child_count: partner.total_child_count || null,
-          classes: partner.classes || null,
-          low_income_resource: partner.low_income_resource || null,
-          created_by: partner.created_by || null,
-          conversion_stage: latestAgreement ? latestAgreement.conversion_stage : null,
-          potential_child_count: latestAgreement ? latestAgreement.potential_child_count : null,
-          current_status: latestAgreement ? latestAgreement.current_status : null,
-          expected_conversion_day: latestAgreement ? latestAgreement.expected_conversion_day : null,
-          non_conversion_reason: latestAgreement ? latestAgreement.non_conversion_reason : null,
-          specific_doc_name: latestAgreement ? latestAgreement.specific_doc_name : null,
-          specific_doc_required: latestAgreement ? latestAgreement.specific_doc_required : null,
-          co_id: null,
-          co_name: null,
-        };
+    const latestPocPartnerMap = new Map(); // partner_id -> poc_id
+    for (const pp of pocPartners) {
+      latestPocPartnerMap.set(pp.partner_id, pp.poc_id); // last one per partner
+    }
 
-        // Fetch CO details
-        const partnerCo = await PartnerCo.findOne({
-          where: { partner_id: partner.id },
-          include: [
-            {
-              model: User,
-              as: 'co',
-              attributes: ['user_id', 'user_display_name'],
-            },
-          ],
-           order: [
-            ['createdAt', 'DESC'],   // newest first
-            ],
-        });
+    const pocIds = [...new Set([...latestPocPartnerMap.values()])];
 
-        if (partnerCo && partnerCo.co) {
-          partnerData.co_id = partnerCo.co.user_id;
-          partnerData.co_name = `${partnerCo.co.user_display_name}`.trim();
-        }
+    let pocMap = new Map();
+    if (pocIds.length) {
+      const pocs = await Poc.findAll({
+        where: { id: pocIds },
+        attributes: [
+          'id',
+          'poc_name',
+          'poc_email',
+          'poc_contact',
+          'poc_designation',
+          'date_of_first_contact',
+        ],
+        raw: true,
+      });
+      pocMap = new Map(pocs.map((p) => [p.id, p]));
+    }
 
-        if (latestAgreement) {
-          // Fetch MOU and Meeting details
-          const mou = await Mou.findOne({ where: { partner_id: partner.id, mou_status: 'active' }, order: [['createdAt', 'DESC']] });
-          const meetings = await Meeting.findAll({ where: { partner_id: partner.id } });
+    /** ✅ STEP 5: Latest CO mapping per partner (PartnerCo + User bulk) **/
+    const partnerCos = await PartnerCo.findAll({
+      where: { partner_id: partnerIdsList },
+      include: [
+        {
+          model: User,
+          as: 'co',
+          attributes: ['user_id', 'user_display_name'],
+        },
+      ],
+      order: [['partner_id', 'ASC'], ['createdAt', 'ASC']],
+    });
 
-          if (mou) {
-            partnerData.latest_mou_id = mou.id
-            partnerData.mou_sign = mou.mou_sign;
-            partnerData.mou_url = mou.mou_url;
-            partnerData.mou_start_date = mou.mou_start_date;
-            partnerData.mou_end_date = mou.mou_end_date;
-            partnerData.mou_sign_date = mou.mou_sign_date;
-            partnerData.mou_status = mou.mou_status;
-            partnerData.pending_mou_reason = mou.pending_mou_reason;
-            partnerData.confirmed_child_count = mou.confirmed_child_count;
-          }
+    const partnerCoMap = new Map(); // partner_id -> PartnerCo
+    partnerCos.forEach((pc) => {
+      partnerCoMap.set(pc.partner_id, pc); // last one per partner
+    });
 
-          if (meetings.length > 0) {
-            partnerData.follow_up_meeting_scheduled = meetings[0].follow_up_meeting_scheduled;
-          }
-        }
+    /** ✅ STEP 6: Latest MOU per partner (active only) **/
+    const mous = await Mou.findAll({
+      where: { partner_id: partnerIdsList, mou_status: 'active' },
+      order: [['partner_id', 'ASC'], ['createdAt', 'ASC']],
+      raw: true,
+    });
 
-        // Fetch POC details
-        if (latestPocPartner) {
-          const poc = await Poc.findOne({
-            where: { id: latestPocPartner.poc_id },
-            attributes: [
-              'id',
-              'poc_name',
-              'poc_email',
-              'poc_contact',
-              'poc_designation',
-              'date_of_first_contact',
-            ],
-          });
+    const latestMouMap = new Map(); // partner_id -> MOU
+    for (const m of mous) {
+      latestMouMap.set(m.partner_id, m); // last one per partner
+    }
 
-          if (poc) {
-            partnerData.poc_id = poc.id;
-            partnerData.poc_name = poc.poc_name;
-            partnerData.poc_contact = poc.poc_contact;
-            partnerData.poc_designation = poc.poc_designation;
-            partnerData.date_of_first_contact = poc.date_of_first_contact;
-            partnerData.poc_email = poc.poc_email;
-          }
-        }
+    /** ✅ STEP 7: Latest Meeting per partner **/
+    const meetings = await Meeting.findAll({
+      where: { partner_id: partnerIdsList },
+      order: [['partner_id', 'ASC'], ['createdAt', 'ASC']],
+      raw: true,
+    });
 
-        return partnerData;
-      })
-    );
+    const latestMeetingMap = new Map(); // partner_id -> meeting row
+    for (const mt of meetings) {
+      latestMeetingMap.set(mt.partner_id, mt); // last one per partner
+    }
+
+    /** ✅ STEP 8: Stitch everything together **/
+    const partnersWithDetails = partners.map((partner) => {
+      const latestAgreement = partner.agreements && partner.agreements[0]; // because include where ensures 1 row
+      const partnerCo = partnerCoMap.get(partner.id);
+      const latestPocId = latestPocPartnerMap.get(partner.id);
+      const poc = latestPocId ? pocMap.get(latestPocId) : null;
+      const latestMou = latestMouMap.get(partner.id);
+      const latestMeeting = latestMeetingMap.get(partner.id);
+
+      const partnerData = {
+        id: partner.id,
+        partner_name: partner.partner_name,
+        address_line_1: partner.address_line_1,
+        address_line_2: partner.address_line_2 || null,
+        city_id: partner.city_id || null,
+        city: partner.city ? partner.city.city_name : null,
+        state_id: partner.state_id || null,
+        state: partner.state ? partner.state.state_name : null,
+        pincode: partner.pincode || null,
+        lead_source: partner.lead_source || null,
+        interested: partner.interested,
+        school_type: partner.school_type || null,
+        partner_affiliation_type: partner.partner_affiliation_type || null,
+        total_child_count: partner.total_child_count || null,
+        classes: partner.classes || null,
+        low_income_resource: partner.low_income_resource || null,
+        created_by: partner.created_by || null,
+
+        // Latest converted agreement fields
+        conversion_stage: latestAgreement ? latestAgreement.conversion_stage : null,
+        potential_child_count: latestAgreement
+          ? latestAgreement.potential_child_count
+          : null,
+        current_status: latestAgreement ? latestAgreement.current_status : null,
+        expected_conversion_day: latestAgreement
+          ? latestAgreement.expected_conversion_day
+          : null,
+        non_conversion_reason: latestAgreement
+          ? latestAgreement.non_conversion_reason
+          : null,
+        specific_doc_name: latestAgreement ? latestAgreement.specific_doc_name : null,
+        specific_doc_required: latestAgreement
+          ? latestAgreement.specific_doc_required
+          : null,
+
+        // CO
+        co_id: partnerCo && partnerCo.co ? partnerCo.co.user_id : null,
+        co_name:
+          partnerCo && partnerCo.co ? `${partnerCo.co.user_display_name}`.trim() : null,
+
+        // POC (latest)
+        poc_id: poc ? poc.id : null,
+        poc_name: poc ? poc.poc_name : null,
+        poc_contact: poc ? poc.poc_contact : null,
+        poc_designation: poc ? poc.poc_designation : null,
+        poc_email: poc ? poc.poc_email : null,
+        date_of_first_contact: poc ? poc.date_of_first_contact : null,
+
+        // Latest active MOU
+        latest_mou_id: latestMou ? latestMou.id : null,
+        mou_sign: latestMou ? latestMou.mou_sign : null,
+        mou_url: latestMou ? latestMou.mou_url : null,
+        mou_start_date: latestMou ? latestMou.mou_start_date : null,
+        mou_end_date: latestMou ? latestMou.mou_end_date : null,
+        mou_sign_date: latestMou ? latestMou.mou_sign_date : null,
+        mou_status: latestMou ? latestMou.mou_status : null,
+        pending_mou_reason: latestMou ? latestMou.pending_mou_reason : null,
+        confirmed_child_count: latestMou ? latestMou.confirmed_child_count : null,
+
+        // Latest meeting
+        follow_up_meeting_scheduled: latestMeeting
+          ? latestMeeting.follow_up_meeting_scheduled
+          : null,
+
+        // Tracking history (all agreement stages)
+        tracking_history: historyMap.get(partner.id) || [],
+      };
+
+      return partnerData;
+    });
 
     const pages = Math.ceil(count / limit);
     const pagination = { page, pages, count };
@@ -244,7 +330,8 @@ const paginatedList = async (req, res) => {
       success: true,
       result: partnersWithDetails,
       pagination,
-      message: 'Successfully retrieved partners with converted agreements and all related details',
+      message:
+        'Successfully retrieved organizations with latest converted agreement, tracking history, and related details',
     });
   } catch (error) {
     console.error('Error fetching partners:', error);
@@ -258,198 +345,3 @@ const paginatedList = async (req, res) => {
 };
 
 module.exports = paginatedList;
-
-// const { Op } = require('sequelize');
-// const {
-//   Partner,
-//   PartnerAgreement,
-//   Mou,
-//   Meeting,
-//   PartnerCo,
-//   User,
-//   City,
-//   Poc,
-//   PocPartner,
-// } = require('../../../../models');
-
-// const paginatedList = async (req, res) => {
-//   console.log('Paginated list API hit for organization');
-
-//   const page = parseInt(req.query.page) || 1;
-//   const limit = parseInt(req.query.items) || 10;
-//   const offset = (page - 1) * limit;
-
-//   const { sortBy = 'createdAt', sortValue = 'DESC', q: searchQuery } = req.query;
-//   const searchableFields = ['partner_name', 'address_line_1', 'lead_source'];
-
-//   let whereCondition = {};
-
-//   if (searchQuery) {
-//     whereCondition[Op.or] = searchableFields.map((field) => ({
-//       [field]: { [Op.iLike]: `%${searchQuery}%` },
-//     }));
-//   }
-
-//   try {
-//     // Step 1: Fetch only partners where the latest agreement is "converted"
-//     const { rows: partners, count } = await Partner.findAndCountAll({
-//       where: whereCondition,
-//       limit,
-//       offset,
-//       order: [[sortBy, sortValue]],
-//       include: [
-//         {
-//           model: City,
-//           as: 'city',
-//           attributes: ['id', 'city_name'],
-//         },
-//         {
-//           model: PartnerAgreement,
-//           as: 'agreements',
-//           where: { conversion_stage: 'converted' }, // ✅ Filter only converted agreements
-//           attributes: ['id', 'partner_id', 'conversion_stage', 'createdAt'],
-//           required: true, // ✅ Ensures only partners with a converted agreement are fetched
-//         },
-//       ],
-//     });
-
-//     const partnerIds = partners.map((partner) => partner.id);
-
-//     // Step 2: Fetch the latest PartnerAgreement for each partner
-//     const latestAgreements = await PartnerAgreement.findAll({
-//       where: { partner_id: partnerIds, conversion_stage: 'converted' },
-//       order: [['createdAt', 'DESC']],
-//       group: ['partner_id', 'id'], // ✅ Ensures latest agreement
-//     });
-
-//     // Step 3: Fetch additional details
-//     const latestPocPartners = await PocPartner.findAll({
-//       where: { partner_id: partnerIds },
-//       order: [['createdAt', 'DESC']],
-//       group: ['partner_id', 'id'], // ✅ Ensures latest POC partner
-//     });
-
-//     const partnersWithDetails = await Promise.all(
-//       partners.map(async (partner) => {
-//         const latestAgreement = latestAgreements.find(
-//           (agreement) => agreement.partner_id === partner.id
-//         );
-
-//         const latestPocPartner = latestPocPartners.find(
-//           (pocPartner) => pocPartner.partner_id === partner.id
-//         );
-
-//         let partnerData = {
-//           id: partner.id,
-//           partner_name: partner.partner_name,
-//           address_line_1: partner.address_line_1,
-//           address_line_2: partner.address_line_2 || null,
-//           city_id: partner.city_id || null,
-//           city: partner.city ? partner.city.city_name : null, // ✅ City Name
-//           state_id: partner.state_id || null,
-//           pincode: partner.pincode || null,
-//           lead_source: partner.lead_source || null,
-//           school_type: partner.school_type || null,
-//           partner_affiliation_type: partner.partner_affiliation_type || null,
-//           total_child_count: partner.total_child_count || null,
-//           classes: partner.classes || null,
-//           low_income_resource: partner.low_income_resource || null,
-//           created_by: partner.created_by || null,
-//           conversion_stage: latestAgreement ? latestAgreement.conversion_stage : null,
-//           potential_child_count: latestAgreement ? latestAgreement.potential_child_count : null,
-//           current_status: latestAgreement ? latestAgreement.current_status : null,
-//           expected_conversion_day: latestAgreement ? latestAgreement.expected_conversion_day : null,
-//           non_conversion_reason: latestAgreement ? latestAgreement.non_conversion_reason : null,
-//           specific_doc_name: latestAgreement ? latestAgreement.specific_doc_name : null,
-//           specific_doc_required: latestAgreement ? latestAgreement.specific_doc_required : null,
-//           co_id: null,
-//           co_name: null,
-//         };
-
-//         // Fetch CO details
-//         const partnerCo = await PartnerCo.findOne({
-//           where: { partner_id: partner.id },
-//           include: [
-//             {
-//               model: User,
-//               as: 'co',
-//               attributes: ['id', 'first_name', 'last_name'],
-//             },
-//           ],
-//         });
-
-//         if (partnerCo && partnerCo.co) {
-//           partnerData.co_id = partnerCo.co.id;
-//           partnerData.co_name = `${partnerCo.co.first_name} ${partnerCo.co.last_name}`.trim();
-//         }
-
-//         if (latestAgreement) {
-//           // Fetch MOU and Meeting details
-//           const mou = await Mou.findOne({ where: { partner_id: partner.id } });
-//           const meetings = await Meeting.findAll({ where: { partner_id: partner.id } });
-
-//           if (mou) {
-//             partnerData.mou_sign = mou.mou_sign;
-//             partnerData.mou_url = mou.mou_url;
-//             partnerData.mou_start_date = mou.mou_start_date;
-//             partnerData.mou_end_date = mou.mou_end_date;
-//             partnerData.mou_sign_date = mou.mou_sign_date;
-//             partnerData.mou_status = mou.mou_status;
-//             partnerData.pending_mou_reason = mou.pending_mou_reason;
-//             partnerData.confirmed_child_count = mou.confirmed_child_count;
-//           }
-
-//           if (meetings.length > 0) {
-//             partnerData.follow_up_meeting_scheduled = meetings[0].follow_up_meeting_scheduled;
-//           }
-//         }
-
-//         // Fetch POC details
-//         if (latestPocPartner) {
-//           const poc = await Poc.findOne({
-//             where: { id: latestPocPartner.poc_id },
-//             attributes: [
-//               'id',
-//               'poc_name',
-//               'poc_email',
-//               'poc_contact',
-//               'poc_designation',
-//               'date_of_first_contact',
-//             ],
-//           });
-
-//           if (poc) {
-//             partnerData.poc_id = poc.id;
-//             partnerData.poc_name = poc.poc_name;
-//             partnerData.poc_contact = poc.poc_contact;
-//             partnerData.poc_designation = poc.poc_designation;
-//             partnerData.date_of_first_contact = poc.date_of_first_contact;
-//             partnerData.poc_email = poc.poc_email;
-//           }
-//         }
-
-//         return partnerData;
-//       })
-//     );
-
-//     const pages = Math.ceil(count / limit);
-//     const pagination = { page, pages, count };
-
-//     return res.status(200).json({
-//       success: true,
-//       result: partnersWithDetails,
-//       pagination,
-//       message: 'Successfully retrieved partners with converted agreements and all related details',
-//     });
-//   } catch (error) {
-//     console.error('Error fetching partners:', error);
-//     return res.status(500).json({
-//       success: false,
-//       result: null,
-//       message: 'Error retrieving partners',
-//       error: error.message,
-//     });
-//   }
-// };
-
-// module.exports = paginatedList;
