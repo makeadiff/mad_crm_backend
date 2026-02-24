@@ -14,7 +14,7 @@ const {
 } = require('../../../../models');
 
 const paginatedList = async (req, res) => {
-  console.log('Paginated Organization list API hit for organization');
+  console.log('Paginated Organization list API hit for organization :', req.query);
 
   const { user_id: id, user_role: role } = req.user;
   const user_id = id;
@@ -22,7 +22,7 @@ const paginatedList = async (req, res) => {
   const limit = parseInt(req.query.items, 10) || 10;
   const offset = (page - 1) * limit;
 
-  const { sortBy = 'createdAt', sortValue = 'DESC', q: searchQuery } = req.query;
+  const { sortBy = 'createdAt', sortValue = 'DESC', q: searchQuery, status = 'active' } = req.query;
   const searchableFields = ['partner_name', 'address_line_1', 'lead_source'];
 
   let whereCondition = {};
@@ -93,7 +93,27 @@ const paginatedList = async (req, res) => {
     // If you want only non-removed orgs, uncomment:
     // whereCondition.removed = false;
 
-    /** ✅ STEP 2: Fetch partners whose *latest* agreement is "converted" **/
+    /** ✅ Build agreement filter based on status param **/
+    // active  → latest agreement is 'converted'
+    // inactive → latest agreement is 'dropped' with current_status = 'closed_not_renewed'
+    const latestCreatedAtSubquery = literal(`(
+      SELECT MAX("pa2"."createdAt")
+      FROM "partner_agreements" AS "pa2"
+      WHERE "pa2"."partner_id" = "agreements"."partner_id"
+    )`);
+
+    const agreementWhere = status === 'inactive'
+      ? {
+          conversion_stage: 'dropped',
+          current_status: 'closed_not_renewed',
+          createdAt: { [Op.eq]: latestCreatedAtSubquery },
+        }
+      : {
+          conversion_stage: 'converted',
+          createdAt: { [Op.eq]: latestCreatedAtSubquery },
+        };
+
+    /** ✅ STEP 2: Fetch partners whose *latest* agreement matches status **/
     const { rows: partners, count } = await Partner.findAndCountAll({
       where: whereCondition,
       limit,
@@ -126,16 +146,7 @@ const paginatedList = async (req, res) => {
             'specific_doc_name',
             'specific_doc_required',
           ],
-          where: {
-            conversion_stage: 'converted',
-            createdAt: {
-              [Op.eq]: literal(`(
-                SELECT MAX("pa2"."createdAt")
-                FROM "partner_agreements" AS "pa2"
-                WHERE "pa2"."partner_id" = "agreements"."partner_id"
-              )`),
-            },
-          },
+          where: agreementWhere,
         },
       ],
     });
@@ -154,16 +165,25 @@ const paginatedList = async (req, res) => {
     /** ✅ STEP 3: Agreements for tracking_history (all stages) **/
     const agreementsForPage = await PartnerAgreement.findAll({
       where: { partner_id: partnerIdsList },
-      attributes: ['partner_id', 'conversion_stage', 'createdAt'],
+      attributes: ['partner_id', 'conversion_stage', 'current_status', 'createdAt'],
       order: [['partner_id', 'ASC'], ['createdAt', 'ASC']],
       raw: true,
     });
 
-    const historyMap = new Map(); // partner_id -> [ { stage, createdAt } ]
+    // Map raw conversion_stage + current_status to a meaningful display label
+    const getDisplayStage = (conversion_stage, current_status) => {
+      if (conversion_stage === 'converted' && current_status === 'renewed') return 'mou_renewed';
+      if (conversion_stage === 'dropped' && current_status === 'closed_not_renewed') return 'partnership_closed';
+      return conversion_stage;
+    };
+
+    const historyMap = new Map(); // partner_id -> [ { stage, display_stage, current_status, createdAt } ]
     for (const a of agreementsForPage) {
       if (!historyMap.has(a.partner_id)) historyMap.set(a.partner_id, []);
       historyMap.get(a.partner_id).push({
         stage: a.conversion_stage,
+        display_stage: getDisplayStage(a.conversion_stage, a.current_status),
+        current_status: a.current_status || null,
         createdAt: a.createdAt,
       });
     }
@@ -218,16 +238,17 @@ const paginatedList = async (req, res) => {
       partnerCoMap.set(pc.partner_id, pc); // last one per partner
     });
 
-    /** ✅ STEP 6: Latest MOU per partner (active only) **/
+    /** ✅ STEP 6: All MOUs per partner (where removed = false) **/
     const mous = await Mou.findAll({
-      where: { partner_id: partnerIdsList, mou_status: 'active' },
-      order: [['partner_id', 'ASC'], ['createdAt', 'ASC']],
+      where: { partner_id: partnerIdsList, removed: false },
+      order: [['partner_id', 'ASC'], ['createdAt', 'DESC']],
       raw: true,
     });
 
-    const latestMouMap = new Map(); // partner_id -> MOU
+    const mouMap = new Map(); // partner_id -> [MOU, MOU, ...]
     for (const m of mous) {
-      latestMouMap.set(m.partner_id, m); // last one per partner
+      if (!mouMap.has(m.partner_id)) mouMap.set(m.partner_id, []);
+      mouMap.get(m.partner_id).push(m);
     }
 
     /** ✅ STEP 7: Latest Meeting per partner **/
@@ -248,7 +269,8 @@ const paginatedList = async (req, res) => {
       const partnerCo = partnerCoMap.get(partner.id);
       const latestPocId = latestPocPartnerMap.get(partner.id);
       const poc = latestPocId ? pocMap.get(latestPocId) : null;
-      const latestMou = latestMouMap.get(partner.id);
+      const partnerMous = mouMap.get(partner.id) || [];
+      const latestMou = partnerMous.length > 0 ? partnerMous[0] : null; // first is most recent (DESC)
       const latestMeeting = latestMeetingMap.get(partner.id);
 
       const partnerData = {
@@ -300,7 +322,7 @@ const paginatedList = async (req, res) => {
         poc_email: poc ? poc.poc_email : null,
         date_of_first_contact: poc ? poc.date_of_first_contact : null,
 
-        // Latest active MOU
+        // Latest active MOU (backward compatibility)
         latest_mou_id: latestMou ? latestMou.id : null,
         mou_sign: latestMou ? latestMou.mou_sign : null,
         mou_url: latestMou ? latestMou.mou_url : null,
@@ -311,10 +333,24 @@ const paginatedList = async (req, res) => {
         pending_mou_reason: latestMou ? latestMou.pending_mou_reason : null,
         confirmed_child_count: latestMou ? latestMou.confirmed_child_count : null,
 
+        // All MOUs (removed=false, ordered by createdAt DESC)
+        mous: partnerMous,
+
         // Latest meeting
         follow_up_meeting_scheduled: latestMeeting
           ? latestMeeting.follow_up_meeting_scheduled
           : null,
+
+        // Partnership status (derived from status query param)
+        partnership_status: status,
+
+        // Locks the MOU Review action if renewal or closure is already recorded
+        mou_review_locked: !!(
+          latestAgreement && (
+            latestAgreement.current_status === 'renewed' ||
+            latestAgreement.current_status === 'closed_not_renewed'
+          )
+        ),
 
         // Tracking history (all agreement stages)
         tracking_history: historyMap.get(partner.id) || [],

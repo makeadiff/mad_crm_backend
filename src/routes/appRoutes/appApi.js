@@ -30,6 +30,15 @@ const routerApp = (entity, controllerName) => {
   if (entity === 'quote') {
     router.route(`/${entity}/convert/:id`).get(catchErrors(controller['convert']));
   }
+
+  if (entity === 'organization') {
+    if (controller.renewMou) {
+      router.route(`/${entity}/renew-mou/:id`).post(catchErrors(controller.renewMou));
+    }
+    if (controller.reallocatePartner) {
+      router.route(`/${entity}/reallocate-partner`).post(catchErrors(controller.reallocatePartner));
+    }
+  }
 };
 
 routesList.forEach(({ entity, controllerName }) => {

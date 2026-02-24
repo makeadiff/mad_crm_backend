@@ -26,6 +26,7 @@ module.exports = (sequelize) => {
       mou_sign: { type: DataTypes.BOOLEAN, defaultValue: false },
       pending_mou_reason: { type: DataTypes.STRING, allowNull: true },
       confirmed_child_count: { type: DataTypes.INTEGER, allowNull: true },
+      removed: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
     },
     {
       sequelize,

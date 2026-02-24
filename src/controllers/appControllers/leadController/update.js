@@ -43,8 +43,8 @@ const update = async (req, res) => {
       interested
     } = req.body;
 
-    console.log('req.body:', req.body);
-    console.log('req.files:', req.files);
+    // console.log('req.body:', req.body);
+    // console.log('req.files:', req.files);
 
     let classes = req.body.classes || req.body['classes[]'] || [];
 

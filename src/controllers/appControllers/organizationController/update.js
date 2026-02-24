@@ -112,10 +112,11 @@ const update = async (req, res) => {
         console.error('Error uploading to S3:', error);
         return res.status(500).json({ success: false, message: 'File upload failed' });
       }
-      const inactiveLastMou = await Mou.update(
+      const markRemovedLastMou = await Mou.update(
         {
           partner_id: partnerId,
           mou_status: 'inactive',
+          removed: true,
         },
         { where: { id: latest_mou_id } }
       );
@@ -131,6 +132,7 @@ const update = async (req, res) => {
           mou_status: 'active',
           confirmed_child_count,
           mou_url,
+          removed: false
         }
       );
 

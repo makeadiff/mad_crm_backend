@@ -7,7 +7,20 @@ const validDeleteReasons = [
   'duplicate_entry',
   'school_dropped',
   'school_inactive',
-  'school_did_not_want_to_continue_with_mad'
+  'school_did_not_want_to_continue_with_mad',
+  // MOU Review discontinue reasons:
+  'school_partner_not_cooperating',
+  'low_child_count',
+  'slot_timing_volunteer_availability_issues',
+  'ngo_partnership_discontinued',
+];
+
+// These reasons come from the MOU Review discontinue flow → status = 'closed_not_renewed'
+const mouDiscontinueReasons = [
+  'school_partner_not_cooperating',
+  'low_child_count',
+  'slot_timing_volunteer_availability_issues',
+  'ngo_partnership_discontinued',
 ];
 
 const deleteSchema = Joi.object({
@@ -51,12 +64,16 @@ const remove = async (req, res) => {
     );
 
 
+    const current_status = mouDiscontinueReasons.includes(delete_reason)
+      ? 'closed_not_renewed'
+      : 'dropped';
+
     await PartnerAgreement.create(
       {
         partner_id: partnerId,
         conversion_stage: 'dropped',
         non_conversion_reason: delete_reason,
-        current_status: 'dropped',
+        current_status,
         agreement_drop_date: new Date(),
         removed: false,
       },
