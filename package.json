@@ -22,6 +22,8 @@
     "db:reset:staging": "cross-env NODE_ENV=staging node scripts/db-manager.js reset staging",
     "db:migrate:prod": "cross-env NODE_ENV=production node scripts/db-manager.js migrate prod",
     "db:status:prod": "cross-env NODE_ENV=production node scripts/db-manager.js status prod",
+    "migration:check:staging": "node scripts/check-migration-consistency.js staging",
+    "migration:check:prod": "node scripts/check-migration-consistency.js prod",
     "sync:users:dev": "cross-env NODE_ENV=development DB_SCHEMA=mad_crm_dev node src/scripts/runUserSync.js --type=full",
     "sync:users:staging": "cross-env NODE_ENV=staging DB_SCHEMA=mad_crm_staging node src/scripts/runUserSync.js --type=full",
     "sync:users:prod": "cross-env NODE_ENV=production DB_SCHEMA=prod ALLOW_MIGRATIONS=false node src/scripts/runUserSync.js --type=full"
