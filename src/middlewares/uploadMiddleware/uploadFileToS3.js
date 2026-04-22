@@ -1,16 +1,16 @@
-const multer = require('multer');
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client } = require('@aws-sdk/client-s3');
+const { Upload } = require('@aws-sdk/lib-storage');
 const path = require('path');
 const { slugify } = require('transliteration');
 require('dotenv').config();
 
-// AWS S3 Configuration
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   },
+  requestTimeout: 120000,
 });
 
 const uploadFileToS3 = async (file, entity, originalName) => {
@@ -19,18 +19,21 @@ const uploadFileToS3 = async (file, entity, originalName) => {
   }
 
   const fileExtension = path.extname(originalName);
-  const uniqueFileID = Math.random().toString(36).slice(2, 7); // Generate unique ID
+  const uniqueFileID = Math.random().toString(36).slice(2, 7);
   const cleanName = slugify(originalName.split('.')[0].toLowerCase());
-  const fileName = `${cleanName}-${uniqueFileID}${fileExtension}`; // Construct safe filename
+  const fileName = `${cleanName}-${uniqueFileID}${fileExtension}`;
 
-  const uploadParams = {
-    Bucket: process.env.AWS_S3_BUCKET_NAME,
-    Key: `uploads/${entity}/${fileName}`,
-    Body: file.data, // <-- Use the binary file directly
-    ContentType: file.mimetype || 'application/octet-stream', // Use mimetype from file
-  };
+  const upload = new Upload({
+    client: s3,
+    params: {
+      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      Key: `uploads/${entity}/${fileName}`,
+      Body: file.data,
+      ContentType: file.mimetype || 'application/octet-stream',
+    },
+  });
 
-  await s3.send(new PutObjectCommand(uploadParams));
+  await upload.done();
 
   return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/uploads/${entity}/${fileName}`;
 };

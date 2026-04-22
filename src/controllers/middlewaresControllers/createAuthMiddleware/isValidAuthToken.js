@@ -109,8 +109,29 @@ const isValidAuthToken = async (req, res, next) => {
     }
 
     
-    // Verify token
-    const verified = jwt.verify(token, process.env.JWT_SECRET);
+    // Verify token — catch JWT-specific errors separately so expiry/invalid
+    // never falls through to the 500 handler below.
+    let verified;
+    try {
+      verified = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (jwtError) {
+      if (jwtError.name === 'TokenExpiredError') {
+        return res.status(401).json({
+          success: false,
+          result: null,
+          message: 'Session expired, please log in again.',
+          jwtExpired: true,
+        });
+      }
+      // JsonWebTokenError, NotBeforeError, or any other JWT problem
+      return res.status(401).json({
+        success: false,
+        result: null,
+        message: 'Invalid authentication token.',
+        jwtExpired: true,
+      });
+    }
+
     if (!verified || !verified.id) {
       return res.status(401).json({
         success: false,
@@ -119,25 +140,41 @@ const isValidAuthToken = async (req, res, next) => {
         jwtExpired: true,
       });
     }
-    // console.log("token varified")
-    // Fetch user by ID from the prod schema
-    const user = await User.findOne({
-      where: { user_id: verified.id },
-    });
 
-    if (!user) {
-      return res.status(401).json({
+    // DB lookup — a failure here is a real server error, not an auth error.
+    // Do NOT set jwtExpired on 500 responses so the frontend does not
+    // log the user out on a transient database outage.
+    try {
+      // console.log("token varified")
+      // Fetch user by ID from the prod schema
+      const user = await User.findOne({
+        where: { user_id: verified.id },
+      });
+
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          result: null,
+          message: "User doesn't exist or is disabled, authorization denied.",
+          jwtExpired: true,
+        });
+      }
+      // console.log("user found in validate token :", user)
+      // Attach user to request
+      // console.log("in validate toke user data stored in req.user -------------->", user)
+      req.user = user;
+      next();
+    } catch (error) {
+      console.error('Token validation error:', error);
+      return res.status(500).json({
         success: false,
         result: null,
-        message: "User doesn't exist or is disabled, authorization denied.",
-        jwtExpired: true,
+        message: 'Internal server error during token validation.',
+        errorMessage: error.message,
+        // jwtExpired intentionally omitted — a DB failure must not trigger
+        // client-side logout.
       });
     }
-    // console.log("user found in validate token :", user)
-    // Attach user to request
-    // console.log("in validate toke user data stored in req.user -------------->", user)
-    req.user = user;
-    next();
   } catch (error) {
     console.error('Token validation error:', error);
     return res.status(500).json({
@@ -145,7 +182,6 @@ const isValidAuthToken = async (req, res, next) => {
       result: null,
       message: 'Internal server error during token validation.',
       errorMessage: error.message,
-      jwtExpired: true,
     });
   }
 };
