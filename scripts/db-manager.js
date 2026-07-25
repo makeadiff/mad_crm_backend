@@ -43,14 +43,14 @@ const DB_CONFIG = {
   }
 };
 
-// Schema names for each environment
+// Schema names for each environment (must match config/config.js and .env.<env> DB_SCHEMA)
 const SCHEMAS = {
   dev: 'mad_crm_dev',
   development: 'mad_crm_dev',
   staging: 'mad_crm_staging',
   test: 'mad_crm_test',
-  prod: 'mad_crm_prod',
-  production: 'mad_crm_prod'
+  prod: 'prod',
+  production: 'prod'
 };
 
 // Map environment names to NODE_ENV values for Sequelize
